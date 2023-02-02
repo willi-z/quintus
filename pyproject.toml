@@ -1,0 +1,23 @@
+[tool.pdm]
+
+[project]
+name = "quintus"
+version = "0.1.0"
+description = "Finding the optimial configuration from a set of materials"
+authors = [
+    {name = "Willi Zschiebsch", email = "willi.zschiebsch@gmail.com"},
+]
+dependencies = [
+    "pre-commit>=3.0.3",
+    "pytest>=7.2.1",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "GPL"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.build]
+source-includes = ["tests"]
