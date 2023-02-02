@@ -25,10 +25,10 @@ repos:
       - id: ruff
 
   # isort is a Python utility / library to sort imports alphabetically, and automatically
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-    - id: isort
+  # - repo: https://github.com/PyCQA/isort
+  #   rev: 5.12.0
+  #   hooks:
+  #   - id: isort
 
   # Black - the Uncompromising Code Formatter
   - repo: https://github.com/ambv/black
