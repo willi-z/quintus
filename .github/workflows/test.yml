@@ -1,0 +1,37 @@
+name: Python package
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [ opened, synchronize ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-pep582: true
+
+    - name: Install dependencies
+      run: pdm install -G test
+    - name: Test with pytest
+      run: |
+        pdm run coverage run -m pytest tests
+    - name: Create report
+      run: |
+        pdm run coverage xml -o "report-py${{ matrix.python-version }}.xml"
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./report-py${{ matrix.python-version }}.xml
