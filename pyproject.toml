@@ -3,36 +3,21 @@
 [project]
 name = "quintus"
 version = "0.1.0"
-description = "Finding the optimial configuration from a set of materials"
+description = "Help you find the optimal configuration from a set of materials."
 authors = [
     {name = "Willi Zschiebsch", email = "willi.zschiebsch@gmail.com"},
 ]
 dependencies = [
-    "pre-commit>=3.0.3",
-    "pytest>=7.2.1",
+    "openpyxl>=3.1.1",
+    "polars>=0.16.11",
+    "optuna>=3.1.0",
+    "pytest>=7.2.2",
+    "numpy>=1.24.2",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 readme = "README.md"
-license = {text = "GPL"}
-
-[project.urls]
-Source = "https://github.com/willi-z/quintus"
-Issues = "https://github.com/willi-z/quintus/issues"
-
-[project.optional-dependencies]
-test = [
-    "coverage>=7.1.0",
-    "pytest>=7.2.1",
-]
-
+license = {text = "MIT"}
 
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
-
-[tool.coverage.run]
-parallel = true
-source = [
-    "tests",
-    "pyMaterial"
-]
