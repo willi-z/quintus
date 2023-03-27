@@ -6,4 +6,19 @@
 
 ---
 
-Finding the optimial configuration from a set of materials
+Help you find the optimal configuration from a set of materials.
+
+
+```
+openpyxl
+polars
+optuna
+
+test = [
+    "coverage>=7.1.0",
+    "pytest>=7.2.1",
+]
+visual=[
+    "optuna-dashboard>=0.8.1",
+]
+```
