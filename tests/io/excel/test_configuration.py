@@ -15,8 +15,6 @@ def test_valid_config():
     except ValidationError as ex:
         print(ex)
         success = False
-
-    print(config)
     assert success
 
 

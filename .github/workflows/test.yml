@@ -27,7 +27,7 @@ jobs:
       run: pdm install -G test
     - name: Test with pytest
       run: |
-        pdm run coverage run -m pytest tests
+        pdm run coverage run --source=quintus -m pytest tests
     - name: Create report
       run: |
         pdm run coverage xml -o "report-py${{ matrix.python-version }}.xml"
