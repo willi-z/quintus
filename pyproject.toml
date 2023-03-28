@@ -25,6 +25,7 @@ build-backend = "pdm.backend"
 test = [
     "coverage>=7.1.0",
     "pytest>=7.2.1",
+    "pytest-cov>=4.0.0",
 ]
 
 [project.optional-dependencies]
