@@ -5,6 +5,7 @@ from pathlib import Path
 from quintus.structures import Material, ValidationError
 from .configuration import ExcelConfiguration, update_config, ExcelSheet
 from quintus.helpers.parser import parse_value
+from typing import cast
 from pprint import pprint
 
 
@@ -102,7 +103,7 @@ class ExcelReader:
                                     )
                                 layer_id = layer_ids.index(cell_prefix)
 
-                                layer = material_data["layers"][layer_id]
+                                layer = cast(dict, material_data["layers"][layer_id])
                                 layer.update({cell_name: value})
                                 continue
                             else:
