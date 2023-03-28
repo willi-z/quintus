@@ -1,6 +1,6 @@
 import pytest
 
-from quintus.battery.helpers import calc_spec_capacity, calc_spec_energy_density
+from quintus.evals.battery.helpers import calc_spec_capacity, calc_spec_energy_density
 
 
 @pytest.mark.parametrize("n_el, molar_mass, result", [(1, 6.940e-3, 3861.9)])

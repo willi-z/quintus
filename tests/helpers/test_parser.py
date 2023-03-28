@@ -1,5 +1,5 @@
 import pytest
-from quintus.io.parser import parse_unit, parse_value
+from quintus.helpers.parser import parse_unit, parse_value
 import numpy as np
 
 
@@ -13,8 +13,9 @@ def test_units(unit: str, value):
 @pytest.mark.parametrize(
     "value_str, norm, minimum, maximum",
     [
-        ("1.3", 1.3, 1.3, 1.3),
-        ("3.563(+/-0.18)", 3.563, 3.563 - 0.18, 3.563 + 0.18),
+        ("1.3", 1.3, 0.0, 0.0),
+        ("3.563(+/-0.18)", 3.563, -0.18, +0.18),
+        ("3.563  (+/- 0.18)", 3.563, -0.18, +0.18),
     ],
 )
 def test_values(value_str: str, norm: float, minimum: float, maximum: float):
