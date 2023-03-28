@@ -1,0 +1,55 @@
+flag_management:
+  default_rules: # the rules that will be followed for any flag added, generally
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+      - type: patch
+        target: 90%
+  individual_flags:
+    - name: helpers
+      paths:
+      - quintus/helpers
+      carryforward: true
+      statuses:
+        - type: project
+          target: 20%
+        - type: patch
+          target: 100%
+    - name: structures
+      paths:
+      - quintus/structures
+      carryforward: true
+      statuses:
+        - type: project
+          target: 20%
+        - type: patch
+          target: 100%
+    - name: io
+      paths:
+      - quintus/io
+      carryforward: true
+      statuses:
+      - type: project
+        target: 20%
+      - type: patch
+        target: 100%
+    - name: evals
+      paths:
+      - quintus/evals
+      carryforward: true
+      statuses:
+      - type: project
+        target: 20%
+      - type: patch
+        target: 100%
+    - name: optimization
+      paths:
+      - quintus/optimization
+      carryforward: true
+      statuses:
+      - type: project
+        target: 20%
+      - type: patch
+        target: 100%
