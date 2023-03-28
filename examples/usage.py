@@ -1,7 +1,10 @@
-from quintus.evals.battery import CapacityEvaluation
+from secrets import mypath  # str of directory
+
 from quintus.io.excel import ExcelReader
 from quintus.io.mongo import MongoDataWriter, MongoDataSet  # noqa
-from secrets import mypath  # str of directory
+
+from quintus.evals import collect_required_attr, generate_filters
+from quintus.evals.battery import CapacityEvaluation
 
 
 writer = MongoDataWriter()
@@ -11,19 +14,17 @@ ExcelReader(
 ).read_all()
 
 
-evaluation = CapacityEvaluation()
-form = evaluation.get_args_form()
-# print(form)
+evaluations = []
+evaluations.append(CapacityEvaluation())
 
-usages = dict()
-
-for key, attr in form.items():
-    if usages.get(key) is None:
-        usages[key] = list()
-
-    usages[key].append(attr)
-
-# print(usages)
+requirements = collect_required_attr(evaluations)
+filters = generate_filters(requirements)
 
 dataset = MongoDataSet()
-dataset.reduce_set(usages)
+for key, filter in filters.items():
+    print(filter)
+    print(f"for {key} found:")
+    results = dataset.find(filter)
+    for res in results:
+        print(res["name"])
+    print("##################")
