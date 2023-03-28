@@ -20,7 +20,6 @@ class MongoDataSet(DataSet):
         self.db = self.client[database]
         self.document = self.db[document]
         self.filter = init_filter
-        print(type(self.document))
 
     def reduce_set(self, filter: dict) -> DataSet:
         final_filter = None
@@ -39,7 +38,7 @@ class MongoDataSet(DataSet):
             final_filter,
         )
 
-    def find(self, query: dict | None):
+    def find(self, query: dict | None = None):
         final_query = None
         if query is not None and self.filter is not None:
             final_query = {"$and": [self.filter, query]}
