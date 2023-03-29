@@ -35,7 +35,7 @@ def get_active_layer(material: Material) -> Layer | None:
         return None
     for i in range(len(material.layers)):
         layer = material.layers[i]
-        descr = layer.__fields__.get("description")
+        descr = layer.__dict__.get("description")
         if descr is not None:
             if descr == "active layer":
                 return layer
