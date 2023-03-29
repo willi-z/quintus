@@ -13,6 +13,8 @@ class SimpleMeasurement(BaseModel):
 
     @validator("tol")
     def valid_tolerance(cls, val):
+        if val is None:
+            return val
         if len(val) > 2:
             raise ValueError(
                 "Tolerance sould be of size 2! " + f"(detemined size {len(val)})"
@@ -28,6 +30,8 @@ class Measurement(SimpleMeasurement):
 
     @validator("source")
     def valid_source(cls, val: str):
+        if val is None:
+            return val
         regexs = [
             r"^experiment$",
             r"^computation$",
@@ -41,4 +45,4 @@ class Measurement(SimpleMeasurement):
 
 
 class Measurements(BaseModel):
-    __root__: dict[str, Measurement]
+    __base__: dict[str, Measurement]
