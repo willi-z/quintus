@@ -3,5 +3,5 @@ from quintus.structures import Measurement
 
 
 class Electrode(BaseModel):
-    thickness: Measurement
-    area_mass: Measurement
+    # thickness: Measurement
+    areal_capacity: Measurement

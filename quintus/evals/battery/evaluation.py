@@ -1,39 +1,74 @@
 from quintus.evals import Evaluation
 from typing import Type
 from abc import abstractmethod
-from quintus.structures import Measurements, collect_model_attr
+from quintus.structures import Measurement, Measurements, generate_attr_filter
+
+
+def validate_battery_filters(filters: dict[str, dict], raise_error=True) -> bool:
+    args = list(filters.keys())
+    keys = ["anode", "cathode", "foil", "separator"]
+    for arg in args:
+        if arg not in keys:
+            if raise_error:
+                raise KeyError(f'"{arg}" is not part of required keys: {keys}.')
+            return False
+    return True
+
+
+def validate_battery_kwargs(
+    filters: dict[str, dict], raise_error=True, **kwargs
+) -> bool:
+    args = list(kwargs.keys())
+    keys = list(filters.keys())
+
+    for key in keys:
+        if key not in args:
+            if raise_error:
+                raise KeyError(f'"{key}" is not in provided arguments: {args}.')
+            return False
+    return True
 
 
 class BatteryEvaluation(Evaluation):
     def __init__(
         self,
-        anode_cls: Type[Measurements] | None,
-        cathode_cls: Type[Measurements] | None,
-        foil_cls: Type[Measurements] | None,
-        separator_cls: Type[Measurements] | None,
+        name: str,
+        unit: str | None,
+        filters: dict[str, dict] | None,
+        validate_filters=True,
     ):
-        self.anode_cls = anode_cls
-        self.cathode_cls = cathode_cls
-        self.foil_cls = foil_cls
-        self.separator_cls = separator_cls
+        self.name = name
+        self.unit = unit
+        if validate_filters:
+            validate_battery_filters(filters)
+        self.filters = filters
 
-    def get_required_attrs(self) -> dict[set[str]]:
-        return {
-            "anode": collect_model_attr(self.anode_cls),
-            "cathode": collect_model_attr(self.cathode_cls),
-            "foil": collect_model_attr(self.foil_cls),
-            "separator": collect_model_attr(self.separator_cls),
-        }
-
-    def evaluate(self, **kwargs) -> float:
-        return self.evaluate_stack(**kwargs)
+    def filter_per_args(self) -> dict[str, dict]:
+        return self.filters
 
     @abstractmethod
-    def evaluate_stack(
-        self,
-        anode: Measurements,
-        cathode: Measurements,
-        foil: Measurements,
-        separator: Measurements,
-    ) -> float:
+    def compute(self, **kwargs) -> float:
         pass
+
+    def evaluate(self, **kwargs) -> dict[str, Measurement]:
+        validate_battery_kwargs(self.filters, kwargs=kwargs)
+        measurement = Measurement(
+            value=self.compute(kwargs), unit=self.unit, source="computation"
+        )
+        return {self.name: measurement}
+
+
+class FastBatterEvaluation(BatteryEvaluation):
+    def __init__(
+        self,
+        name: str,
+        unit: str | None,
+        eval_args: dict[str, Type[Measurements]],
+        req_usage: dict[str, str] = None,
+    ):
+        filters = dict()
+        if req_usage is None:
+            req_usage = dict()
+        for arg, arg_type in eval_args.items():
+            filters[arg] = generate_attr_filter(arg_type, req_usage.get(arg))
+        super().__init__(name, unit, filters)

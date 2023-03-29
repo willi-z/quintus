@@ -1,4 +1,5 @@
 from .constants import CONST_F
+from quintus.structures import Layer, Material
 
 
 def calc_spec_capacity(n_el: int, molar_mass: float) -> float:
@@ -27,3 +28,16 @@ def calc_spec_energy_density(spec_capacity: float, V_0: float) -> float:
     """
     assert spec_capacity >= 0
     return spec_capacity * abs(V_0)
+
+
+def get_active_layer(material: Material) -> Layer | None:
+    if material.layers is None:
+        return None
+    for i in range(len(material.layers)):
+        layer = material.layers[i]
+        descr = layer.__fields__.get("description")
+        if descr is not None:
+            if descr == "active layer":
+                return layer
+
+    return None
