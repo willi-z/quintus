@@ -2,10 +2,10 @@ from quintus.evals.evaluation import Evaluation
 
 
 class EvaluationTestAttrs(Evaluation):
-    def __init__(self, attrs: dict[str, set[str]]):
+    def __init__(self, attrs: dict[str, dict]):
         self.required_attrs = attrs
 
-    def get_required_attrs(self) -> dict[str, set[str]]:
+    def filter_per_args(self) -> dict[str, dict]:
         return self.required_attrs
 
     def evaluate(self, **kwargs) -> float:
