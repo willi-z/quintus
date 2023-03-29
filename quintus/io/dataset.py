@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Iterator
 
 
 class DataSet(metaclass=ABCMeta):
@@ -7,5 +8,5 @@ class DataSet(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def find(self, query: dict | None):
+    def find(self, query: dict | None) -> Iterator[dict]:
         pass
