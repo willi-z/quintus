@@ -1,10 +1,14 @@
 name: Python package
 
 on:
-  [push]
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [ opened, synchronize ]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
