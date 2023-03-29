@@ -1,7 +1,6 @@
-from quintus.evals import Evaluation
+from quintus.evals import BasicEvaluation
 from typing import Type
-from abc import abstractmethod
-from quintus.structures import Measurement, Measurements, generate_attr_filter
+from quintus.structures import Measurements, generate_attr_filter
 
 
 def validate_battery_filters(filters: dict[str, dict], raise_error=True) -> bool:
@@ -15,21 +14,7 @@ def validate_battery_filters(filters: dict[str, dict], raise_error=True) -> bool
     return True
 
 
-def validate_battery_kwargs(
-    filters: dict[str, dict], raise_error=True, **kwargs
-) -> bool:
-    args = list(kwargs.keys())
-    keys = list(filters.keys())
-
-    for key in keys:
-        if key not in args:
-            if raise_error:
-                raise KeyError(f'"{key}" is not in provided arguments: {args}.')
-            return False
-    return True
-
-
-class BatteryEvaluation(Evaluation):
+class BatteryEvaluation(BasicEvaluation):
     def __init__(
         self,
         name: str,
@@ -37,25 +22,9 @@ class BatteryEvaluation(Evaluation):
         filters: dict[str, dict] | None,
         validate_filters=True,
     ):
-        self.name = name
-        self.unit = unit
         if validate_filters:
             validate_battery_filters(filters)
-        self.filters = filters
-
-    def filter_per_args(self) -> dict[str, dict]:
-        return self.filters
-
-    @abstractmethod
-    def compute(self, **kwargs) -> float:
-        pass
-
-    def evaluate(self, **kwargs) -> dict[str, Measurement]:
-        validate_battery_kwargs(self.filters, kwargs=kwargs)
-        measurement = Measurement(
-            value=self.compute(kwargs), unit=self.unit, source="computation"
-        )
-        return {self.name: measurement}
+        super().__init__(name, unit, filters)
 
 
 class FastBatterEvaluation(BatteryEvaluation):

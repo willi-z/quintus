@@ -14,3 +14,16 @@ def generate_filters(evaluations: list[Evaluation]) -> dict[str, dict]:
             filter_list.append(filter)
 
     return filters
+
+
+def validate_evaluations(
+    evaluations: list[Evaluation] | set[Evaluation], raise_error=True
+) -> bool:
+    keys = set()
+    for evaluation in evaluations:
+        key = evaluation.get_result_name()
+        if key in keys:
+            if raise_error:
+                raise KeyError(f"'{key}' is already used!")
+            return False
+    return True
