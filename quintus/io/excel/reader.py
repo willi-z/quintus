@@ -114,7 +114,9 @@ class ExcelReader:
 
                     try:
                         material = Material(**material_data)
-                        self.writer.write_entry(material.dict())
+                        self.writer.write_entry(
+                            material.dict(exclude_unset=True, exclude_none=True)
+                        )
                         # pprint(material.dict())
                     except ValidationError as err:
                         print(f"Error: {material_data['name']}")
