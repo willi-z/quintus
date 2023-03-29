@@ -30,6 +30,7 @@ class Measurement(SimpleMeasurement):
     def valid_source(cls, val: str):
         regexs = [
             r"^experiment$",
+            r"^computation$",
             r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b',
         ]
         for regex in regexs:
