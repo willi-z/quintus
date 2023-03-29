@@ -30,8 +30,6 @@ sort_units_by_priority()
 
 
 def parse_unit(unit: str) -> float:
-    print(units)
-
     for key in units:
         index = unit.find(key)
         if index != -1:
