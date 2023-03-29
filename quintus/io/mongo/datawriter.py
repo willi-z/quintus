@@ -17,5 +17,8 @@ class MongoDataWriter(DataWriter):
         if override:
             self.document.drop()
 
-    def write_entry(self, entry: dict):
-        self.document.insert_one(entry)
+    def write_entry(self, entry: dict, filter: dict = None):
+        if filter is None:
+            self.document.insert_one(entry)
+        else:
+            self.document.update_one(filter, {"$set": entry})

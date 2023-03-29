@@ -1,4 +1,5 @@
 from quintus.io.dataset import DataSet
+from typing import Iterator
 import pymongo
 
 
@@ -38,7 +39,7 @@ class MongoDataSet(DataSet):
             final_filter,
         )
 
-    def find(self, query: dict | None = None):
+    def find(self, query: dict | None = None) -> Iterator[dict]:
         final_query = None
         if query is not None and self.filter is not None:
             final_query = {"$and": [self.filter, query]}
