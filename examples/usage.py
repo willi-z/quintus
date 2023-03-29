@@ -3,9 +3,12 @@ from secrets import mypath  # str of directory
 from quintus.io.excel import ExcelReader
 from quintus.io.mongo import MongoDataWriter, MongoDataSet  # noqa
 
-from quintus.evals.battery import CapacityEvaluation
+from quintus.evals.battery.component import ElectrodeCapacityCalc
 
-from quintus.optimization import Optimizer
+from quintus.evals.battery import CapacityEvaluation, StiffnessEvaluation
+
+from quintus.walkers import DataFiller
+from quintus.walkers.optimization import Optimizer
 
 writer = MongoDataWriter()
 
@@ -14,11 +17,30 @@ ExcelReader(
 ).read_all()
 
 
-evaluations = []
-evaluations.append(CapacityEvaluation())
+def data_extension():
+    # Componentwise Dateset-Extension
+    evaluations = set()
+    evaluations.add(ElectrodeCapacityCalc())
+    dataset = MongoDataSet()
+    result_writer = MongoDataWriter(override=False)  # same set!
+    optimizer = DataFiller(dataset, evaluations, result_writer)
+    optimizer.walk()
 
-dataset = MongoDataSet()
-result_writer = MongoDataWriter(document="results1")
 
-optimizer = Optimizer(dataset, evaluations, result_writer)
-optimizer.search()
+data_extension()
+
+
+def stage1_evaluation():
+    # first simple evaluation
+    evaluations = set()
+    evaluations.add(CapacityEvaluation())
+    evaluations.add(StiffnessEvaluation())
+
+    dataset = MongoDataSet()
+    result_writer = MongoDataWriter(document="results1")
+
+    optimizer = Optimizer(dataset, evaluations, result_writer)
+    optimizer.walk()
+
+
+# stage1_evaluation()
