@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from quintus.structures import Measurement
 
 
 class Evaluation(ABC):
     @abstractmethod
-    def get_required_attrs(self) -> dict[str, set[str]]:
+    def filter_per_args(self) -> dict[str, dict]:
         pass
 
     @abstractmethod
-    def evaluate(self, **kwargs) -> float:
+    def evaluate(self, **kwargs) -> dict[str, Measurement]:
         pass

@@ -2,25 +2,15 @@ from .evaluation import Evaluation
 from typing import cast
 
 
-def collect_required_attr(evaluations: list[Evaluation]) -> dict[set[str]]:
-    result = dict[str, set[str]]()
-    for eval in evaluations:
-        for key, attrs in eval.get_required_attrs().items():
-            if result.get(key) is None:
-                result[key] = attrs
-            else:
-                result[key].update(attrs)
-    return result
-
-
-def generate_filters(required_attr: dict[set[str]]) -> dict[dict]:
+def generate_filters(evaluations: list[Evaluation]) -> dict[str, dict]:
     filters = dict[str, dict]()
-    for key, attrs in required_attr.items():
-        if filters.get(key) is None:
-            filters[key] = {"$and": [{"usage": {"$in": [key]}}]}
+    for evaluation in evaluations:
+        eval_filter = evaluation.filter_per_args()
+        for key, filter in eval_filter.items():
+            if filters.get(key) is None:
+                filters[key] = {"$and": []}  # {"usage": {"$in": [key]}}
 
-        filter = cast(list, filters[key]["$and"])
-        for attr in attrs:
-            filter.append({attr: {"$exists": True}})
+            filter_list = cast(list, filters[key]["$and"])
+            filter_list.append(filter)
 
     return filters
