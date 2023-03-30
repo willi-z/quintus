@@ -21,6 +21,14 @@ class MongoDataSet(DataSet):
         self.db = self.client[database]
         self.document = self.db[document]
         self.filter = init_filter
+        self.size = 0
+        if self.filter is None:
+            self.size = self.document.count_documents(dict())
+        else:
+            self.size = self.document.count_documents(self.filter)
+
+    def __len__(self) -> int:
+        return self.size
 
     def reduce_set(self, filter: dict) -> DataSet:
         final_filter = None
