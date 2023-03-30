@@ -4,7 +4,7 @@ from quintus.structures import Measurement
 
 class Evaluation(ABC):
     @abstractmethod
-    def get_result_name(self) -> str:
+    def get_result_names(self) -> set[str]:
         pass
 
     @abstractmethod
@@ -12,7 +12,7 @@ class Evaluation(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self, **kwargs) -> dict[str, Measurement]:
+    def evaluate(self, **kwargs) -> dict[str, dict]:
         pass
 
 
@@ -23,7 +23,7 @@ def validate_kwargs(filters: dict[str, dict], raise_error=True, **kwargs) -> boo
     for key in keys:
         if key not in args:
             if raise_error:
-                raise KeyError(f'"{key}" is not in provided arguments: {args}.')
+                raise AttributeError(f'"{key}" is not in provided arguments: {args}.')
             return False
     return True
 
@@ -43,15 +43,15 @@ class BasicEvaluation(Evaluation):
     def compute(self, **kwargs) -> float:
         pass
 
-    def get_result_name(self) -> str:
-        return self.name
+    def get_result_names(self) -> set[str]:
+        return {self.name}
 
     def filter_per_args(self) -> dict[str, dict]:
         return self.filters
 
-    def evaluate(self, **kwargs) -> dict[str, Measurement]:
+    def evaluate(self, **kwargs) -> dict[str, dict]:
         validate_kwargs(self.filter_per_args(), True, **kwargs)
         measurement = Measurement(
             value=self.compute(**kwargs), unit=self.unit, source="computation"
         )
-        return {self.get_result_name(): measurement}
+        return {self.name: measurement.dict(exclude_unset=True, exclude_none=True)}

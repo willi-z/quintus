@@ -19,11 +19,13 @@ def generate_filters(evaluations: list[Evaluation]) -> dict[str, dict]:
 def validate_evaluations(
     evaluations: list[Evaluation] | set[Evaluation], raise_error=True
 ) -> bool:
-    keys = set()
+    keys = set[str]()
     for evaluation in evaluations:
-        key = evaluation.get_result_name()
-        if key in keys:
+        new_keys = evaluation.get_result_names()
+        duplicate_keys = keys & new_keys  # intersection
+        if len(duplicate_keys) != 0:
             if raise_error:
-                raise KeyError(f"'{key}' is already used!")
+                raise KeyError(f"'{duplicate_keys}' already used!")
             return False
+        keys.update(new_keys)
     return True

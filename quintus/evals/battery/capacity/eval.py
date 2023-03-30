@@ -1,5 +1,6 @@
 from quintus.evals.battery import FastBatterEvaluation
 from .model import Electrode
+from quintus.structures import get_SI_value
 
 
 class CapacityEvaluation(FastBatterEvaluation):
@@ -9,6 +10,8 @@ class CapacityEvaluation(FastBatterEvaluation):
         )
 
     def compute(self, **kwargs) -> float:
-        anode = Electrode(kwargs["anode"])
-        cathode = Electrode(kwargs["cathode"])
-        return min(anode.areal_capacity, cathode.areal_capacity)
+        anode = Electrode(**kwargs["anode"])
+        cathode = Electrode(**kwargs["cathode"])
+        return min(
+            get_SI_value(anode.areal_capacity), get_SI_value(cathode.areal_capacity)
+        )

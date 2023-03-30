@@ -1,12 +1,13 @@
 from quintus.evals.battery import FastBatterEvaluation
 from .model import StiffMaterial
+from quintus.structures import get_SI_value
 
 
 class StiffnessEvaluation(FastBatterEvaluation):
     def __init__(self):
         super().__init__(
-            "areal_capacity",
-            "C/m^2",
+            "stiffness",
+            "N/m^2",
             {
                 "anode": StiffMaterial,
                 "cathode": StiffMaterial,
@@ -22,6 +23,6 @@ class StiffnessEvaluation(FastBatterEvaluation):
         )
 
     def compute(self, **kwargs) -> float:
-        anode = StiffMaterial(kwargs["anode"])
-        cathode = StiffMaterial(kwargs["cathode"])
-        return min(anode.areal_capacity, cathode.areal_capacity)
+        anode = StiffMaterial(**kwargs["anode"])
+        cathode = StiffMaterial(**kwargs["cathode"])
+        return (get_SI_value(anode.E_t_xx) + get_SI_value(cathode.E_t_xx)) / 2

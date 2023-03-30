@@ -16,9 +16,7 @@ class ElectrodeCapacityCalc(BatteryEvaluation):
             }
         }
 
-        filters = {
-            name: {"$and": [layers_filter, {"areal_capacity": {"$exists": False}}]}
-        }
+        filters = {name: layers_filter}
         super().__init__(name, "C/m^2", filters, False)
 
     def compute(self, **kwargs) -> float:

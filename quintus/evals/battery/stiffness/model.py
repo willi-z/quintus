@@ -1,8 +1,7 @@
-from pydantic import BaseModel
-from quintus.structures import Measurement
+from quintus.structures import Measurement, Material
 
 
-class StiffMaterial(BaseModel):
+class StiffMaterial(Material):
     thickness: Measurement
     E_t_xx: Measurement
     E_t_yy: Measurement | None
