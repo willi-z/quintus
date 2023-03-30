@@ -5,7 +5,7 @@ import re
 class SimpleMeasurement(BaseModel):
     value: float
     unit: str
-    tol: tuple[float] = None
+    tol: tuple[float] | list[float] = None
 
     @validator("unit")
     def valid_unit(cls, val):
