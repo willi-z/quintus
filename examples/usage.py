@@ -8,7 +8,7 @@ from quintus.evals.battery.component import ElectrodeCapacityCalc
 from quintus.evals.battery import CapacityEvaluation, StiffnessEvaluation
 
 from quintus.walkers import DataFiller
-from quintus.walkers.optimization import Optimizer
+from quintus.walkers.optimization import BruteForceOptimizer
 
 writer = MongoDataWriter()
 
@@ -39,8 +39,8 @@ def stage1_evaluation():
     dataset = MongoDataSet()
     result_writer = MongoDataWriter(document="results1")
 
-    optimizer = Optimizer(dataset, evaluations, result_writer)
+    optimizer = BruteForceOptimizer(dataset, evaluations, result_writer)
     optimizer.walk()
 
 
-# stage1_evaluation()
+stage1_evaluation()
