@@ -1,4 +1,5 @@
 from .walker import BasicDataWalker
+from typing import cast
 
 
 class DataFiller(BasicDataWalker):
@@ -14,6 +15,7 @@ class DataFiller(BasicDataWalker):
                 )
             results = self.dataset.find(filters[0])
             for result in results:
+                result = cast(dict, result)
                 entries = evaluation.evaluate(**{keys[0]: result})
                 unique_filter = None
                 if result.get("_id"):
@@ -22,9 +24,6 @@ class DataFiller(BasicDataWalker):
                     raise KeyError(
                         "Warning: Could not find unique filter for: " + f"{result}"
                     )
-
-                for key, measurement in entries.items():
-                    entry = measurement.dict(exclude_unset=True, exclude_none=True)
-                    self.writer.write_entry({key: entry}, unique_filter)
+                self.writer.write_entry(entries, unique_filter)
                 name = result["name"]
                 print(f"updated: {name}")
