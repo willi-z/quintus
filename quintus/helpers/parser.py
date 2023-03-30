@@ -13,6 +13,12 @@ units = {
     "µm": 1e-6,
     "%": 1e-2,
     "V": 1,
+    "Pa": 1,
+    "kPa": 1e3,
+    "MPa": 1e6,
+    "GPa": 1e9,
+    "°C": "change system",
+    "C": 1,
 }
 
 operators = {"^": "**"}
