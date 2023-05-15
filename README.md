@@ -12,8 +12,8 @@ Help you find the optimal configuration from a set of materials.
 
 
 The idea is to have a dataset of material data, which are evaluated over multiple levels.
-After each level the best materials and possible combinations are determined.
-Further, missing properties are listed that are required for the nest level.
+After each level, the best materials and possible combinations are determined.
+Further, missing properties are listed that are required for the next level.
 
 
 ## Development
