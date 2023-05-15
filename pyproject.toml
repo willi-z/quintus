@@ -32,5 +32,6 @@ test = [
 visual=[
     "flask>=2.2.3",
     "plotly>=5.13.1",
+    "matplotlib>=3.7.1",
 ]
 all = ["quintus[visual,test]"]
