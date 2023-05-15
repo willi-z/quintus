@@ -4,7 +4,7 @@ import re
 
 class SimpleMeasurement(BaseModel):
     value: float
-    unit: str
+    unit: str = "1"
     tol: tuple[float] | list[float] = None
 
     @validator("unit")
