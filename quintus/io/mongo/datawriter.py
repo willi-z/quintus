@@ -1,4 +1,5 @@
 from quintus.io.datawriter import DataWriter
+from typing import Iterator
 import pymongo
 
 
@@ -22,3 +23,6 @@ class MongoDataWriter(DataWriter):
             self.document.insert_one(entry)
         else:
             self.document.update_one(filter, {"$set": entry})
+
+    def get_entry(self, id: str) -> Iterator[dict]:
+        return self.document.find({"_id": id})

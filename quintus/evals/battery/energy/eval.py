@@ -31,16 +31,16 @@ class EnergyDensity(FastBatterEvaluation):
 
         active_layer = get_active_layer(anode)
         areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
-        layers = Measurement(**active_layer.__dict__.get("layers"))
+        # layers = Measurement(**active_layer.__dict__.get("layers"))
         anode_capacity = get_SI_value(areal_capacity)  # [As/m^2}
-        anode_layers = get_SI_value(layers)  # []
+        # anode_layers = get_SI_value(layers)  # []
         anode_voltage = get_SI_value(anode.potential_vs_Li)  # [V]
 
-        active_layer = get_active_layer(anode)
+        active_layer = get_active_layer(cathode)
         areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
-        layers = Measurement(**active_layer.__dict__.get("layers"))
+        # layers = Measurement(**active_layer.__dict__.get("layers"))
         cathode_capacity = get_SI_value(areal_capacity)  # [As/m^2}
-        cathode_layers = get_SI_value(layers)  # []
+        # cathode_layers = get_SI_value(layers)  # []
         cathode_voltage = get_SI_value(cathode.potential_vs_Li)  # [V]
 
         dV = cathode_voltage - anode_voltage
@@ -51,7 +51,7 @@ class EnergyDensity(FastBatterEvaluation):
             m_sum += get_SI_value(layer.thickness) * get_SI_value(layer.density)
 
         return (
-            min(anode_capacity * anode_layers, cathode_capacity * cathode_layers)
+            min(anode_capacity, cathode_capacity)  #  * anode_layers  # * cathode_layers
             * dV
             / m_sum
             / 3600.0

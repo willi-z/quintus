@@ -1,0 +1,13 @@
+:root {
+    --purple: #e41b6f;
+    --off-white: #f8f8f8;
+    --off-black: #444444;
+    --shadow: 0 0 30px #cccccc;
+    --xs: 0.2rem;
+    --sm: 0.5rem;
+    --md: 0.8rem;
+    --lg: 1rem;
+    --xlg: 1.5rem;
+    --xxlg: 2rem;
+    --transition: 0.3s linear all;
+}

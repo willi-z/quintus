@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Material Page</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/default.css') }}">
+    </head>
+    <body>
+        <main>
+        {% for material in materials %}
+            <a href="{{ material.url }}">{{ material }}</a>
+        {% endfor %}
+        </main>
+    </body>
+</html>

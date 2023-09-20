@@ -6,7 +6,7 @@ from quintus.structures import Material, ValidationError
 from .configuration import ExcelConfiguration, update_config, ExcelSheet
 from quintus.helpers.parser import parse_value
 from typing import cast
-from pprint import pprint
+import warnings
 
 
 class ExcelReader:
@@ -26,6 +26,9 @@ class ExcelReader:
     def read_all(self):
         sheets_names = self.wb.sheetnames
         for sheet_name in sheets_names:
+            if sheet_name in self.config.ignore:
+                continue
+
             master_config = self.config.dict()
             master_config.pop("ignore")
             master_config.pop("sheets")
@@ -113,14 +116,25 @@ class ExcelReader:
                         material_data.update({cell_name: value})
 
                     try:
+                        if len(material_data.keys()) <= 1:
+                            # empty line
+                            continue
+
                         material = Material(**material_data)
                         self.writer.write_entry(
                             material.dict(exclude_unset=True, exclude_none=True)
                         )
                         # pprint(material.dict())
-                    except ValidationError as err:
-                        print(f"Error: {material_data['name']}")
-                        print(err)
-                        print("# Got:")
-                        pprint(material_data)
-                        print("####################")
+                    except ValidationError:
+                        # warnings.warn(
+                        #     "Problems when trying to read entry "
+                        #     +f"at sheet {name} in row {row_number}"
+                        #     )
+
+                        if "name" not in material_data.keys():
+                            warnings.warn("Could not find a name.")
+                        else:
+                            warnings.warn(
+                                "Something went wrong when trying to read "
+                                f"{material_data['name']}"
+                            )

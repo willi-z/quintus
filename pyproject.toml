@@ -13,6 +13,9 @@ dependencies = [
     "pymongo>=4.3.3",
     "pydantic>=1.10.6",
     "pymaterial>=0.1.2",
+    "psycopg[binary]>=3.1.10",
+    "click>=8.1.7",
+    "flask-login>=0.6.2",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

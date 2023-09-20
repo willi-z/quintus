@@ -1,6 +1,7 @@
 from quintus.walkers import BasicDataWalker
 from quintus.io import DataSet, DataWriter
 from quintus.evals import Evaluation, generate_filters
+from pprint import pprint
 
 
 class Optimizer(BasicDataWalker):
@@ -15,6 +16,11 @@ class Optimizer(BasicDataWalker):
         filters = generate_filters(evaluations)
         for key, filter in filters.items():
             self.subsets[key] = self.dataset.reduce_set(filter)
+            print(f"For dataset {key} found {len(self.subsets[key])} entires.")
+            pprint(filter)
+            results = self.subsets[key].find()
+            for res in results:
+                print(res["name"])
 
     def walk(self):
         for key, dataset in self.subsets.items():

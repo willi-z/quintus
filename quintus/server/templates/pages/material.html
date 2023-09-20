@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Material Page</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/default.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/material.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tags.css') }}">
+        <script
+            src="{{ url_for('static', filename='js/request.js') }}"
+            type="module">
+        </script>
+    </head>
+    <body>
+        <main>
+        {% include "tools/name/name.html" %}
+        {% include "tools/tags/tags.html" %}
+        {% include "tools/description/description.html" %}
+        {% include "tools/properties/properties.html" %}
+        </main>
+    </body>
+    <script type="module" src="{{ url_for('static', filename='js/material.js') }}"></script>
+</html>

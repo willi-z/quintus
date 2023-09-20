@@ -1,0 +1,139 @@
+apiVersion: v1
+data:
+  db-password: dGhpc2lzdGhlb25seXVzZXJzUGFzc3dvcmQh
+  db-username: dGhpc2lzdGhlb25seXVzZXI=
+kind: Secret
+metadata:
+  name: mongo-secrets
+type: Opaque
+---
+apiVersion: v1
+data:
+  db-password: dGhpc2lzdGhlb25seXVzZXJzUGFzc3dvcmQh
+  db-username: dGhpc2lzdGhlb25seXVzZXI=
+kind: Secret
+metadata:
+  name: postgres-secrets
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: quintus
+  name: quintus
+spec:
+  ports:
+  - name: mongo
+    nodePort: 27017
+    port: 27017
+  - name: postgres
+    nodePort: 5432
+    port: 5432
+  selector:
+    app: quintus
+  type: NodePort
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    app: quintus
+    type: local
+  name: mongo-pv-volume
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: /home/willi/dbs/quintus/mongo
+  storageClassName: manual
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    app: quintus
+    type: local
+  name: postgres-pv-volume
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: /home/willi/dbs/quintus/postgres
+  storageClassName: manual
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: quintus
+  name: mongo-pv-claim
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: manual
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: quintus
+  name: postgres-pv-claim
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: manual
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: quintus
+  name: quintus
+spec:
+  containers:
+  - image: docker.io/library/mongo:latest
+    name: mongo
+    ports:
+    - containerPort: 27017
+    volumeMounts:
+    - mountPath: /data/db
+      name: mongodb
+  - env:
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          key: db-username
+          name: postgres-secrets
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: db-password
+          name: postgres-secrets
+    - name: POSTGRES_DB
+      value: quintus
+    image: docker.io/library/postgres:latest
+    imagePullPolocy: IfNotPresent
+    name: postgres
+    ports:
+    - containerPort: 5432
+    volumeMounts:
+    - mountPath: /var/lib/postgresql/data
+      name: postgredb
+  volumes:
+  - name: postgredb
+    persistentVolumeClaim:
+      claimName: postgres-pv-claim
+  - name: mongodb
+    persistentVolumeClaim:
+      claimName: mongo-pv-claim

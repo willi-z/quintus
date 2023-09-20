@@ -1,0 +1,19 @@
+<fieldset>
+    <div class="item_container_large property-list">
+        <p class="item_small">properties</p>
+        <table class="item_large">
+            <tr>
+                <th>name</td>
+                <th>value</td>
+                <th>unit</td>
+                <th>source</td>
+                <th></td><!--Edit-->
+                <th></td><!--Delete-->
+            </tr>
+            {% for entry in entries %}
+                {% include "tools/properties/property.html" %}
+            {% endfor %}
+            {% include "tools/properties/property_form.html" %}
+        </table>
+    </div>
+</fieldset>
