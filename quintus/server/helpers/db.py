@@ -27,13 +27,11 @@ def close_user_db(event=None):
 
 def get_data_db() -> database.Database:
     if "data_db" not in g:
-        port = current_app.config["DB_DATA.PORT"]
-        username = current_app.config["DB_DATA.USER"]
-        password = current_app.config["DB_DATA.PASSWORD"]
-        # username=base64.b64decode(current_app.config["DB_DATA.USER"]).decode()
-        # password=base64.b64decode(current_app.config["DB_DATA.PASSWORD"]).decode()
         g.data_db = MongoClient(
-            "mongodb://{}:{}@{}:{}".format(username, password, "localhost", port)
+            host="localhost",
+            port=int(current_app.config["DB_DATA.PORT"]),
+            username=base64.b64decode(current_app.config["DB_DATA.USER"]).decode(),
+            password=base64.b64decode(current_app.config["DB_DATA.PASSWORD"]).decode(),
         )
         g.data_db
         # g.db.row_factory = sqlite3.Row

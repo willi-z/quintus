@@ -21,6 +21,8 @@ spec:
           secretKeyRef:
             name: mongo-secrets
             key: db-password
+      - name: MONGO_INITDB_DATABASE
+        value: admin
     volumeMounts:
     - mountPath: /data/db
       name: mongodb

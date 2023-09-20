@@ -1,5 +1,8 @@
 
 - https://phoenixnap.com/kb/kubernetes-mongodb
+https://stackoverflow.com/questions/51815216/authentication-mongo-deployed-on-kubernetes
+
+https://www.cloudytuts.com/guides/kubernetes/how-to-deploy-mongodb-on-kubernetes/
 
 ```sh
 echo -n '<user_name>' | base64

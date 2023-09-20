@@ -113,6 +113,8 @@ spec:
         secretKeyRef:
           key: db-password
           name: mongo-secrets
+    - name: MONGO_INITDB_DATABASE
+      value: admin
     image: docker.io/library/mongo:latest
     name: mongo
     ports:
