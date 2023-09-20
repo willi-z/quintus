@@ -36,13 +36,6 @@ def create_account(
     if roles is None:
         return
 
-    """
-    cursor.execute("SELECT * FROM roles;")
-    results = cursor.fetchall()
-    for result in results:
-        print(result)
-    """
-
     content = []
     for role in roles:
         content.append(f"({user_id},{role})")
@@ -54,18 +47,29 @@ def create_account(
 
 def get_account_from_id(cursor: Cursor, unique_identifier: str):
     cursor.execute("SELECT * FROM accounts WHERE user_id=%s;", [unique_identifier])
-    response = cursor.fetchone()
-    if response is None:
+    user_response = cursor.fetchone()
+    if user_response is None:
         return None
+
+    cursor.execute(
+        "SELECT role_id FROM account_roles WHERE user_id=%s;", [unique_identifier]
+    )
+    role_response = cursor.fetchall()
+    roles = []
+    if role_response is not None:
+        for role in role_response:
+            roles.append(role[0])
+
     return {
-        "user_id": response[0],
-        "username": response[1],
-        "password": response[2],
-        "salt": response[3],
-        "email": response[4],
-        "disabled": response[5],
-        "created_on": response[6],
-        "last_login": response[7],
+        "user_id": user_response[0],
+        "username": user_response[1],
+        "password": user_response[2],
+        "salt": user_response[3],
+        "email": user_response[4],
+        "disabled": user_response[5],
+        "created_on": user_response[6],
+        "last_login": user_response[7],
+        "roles": roles,
     }
 
 

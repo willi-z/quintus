@@ -6,9 +6,10 @@
     </head>
     <body>
         <main>
-        {% for material in materials %}
-            <a href="{{ material.url }}">{{ material }}</a>
-        {% endfor %}
+            <a href="/entry/new">Create new!</a>
+            {% for material in materials %}
+                <a href="{{ material.url }}">{{ material }}</a>
+            {% endfor %}
         </main>
     </body>
 </html>

@@ -1,10 +1,10 @@
 from flask import current_app, g
 import psycopg
-from quintus.io.mongo import MongoDataWriter
+from pymongo import MongoClient, database
 import base64
 
 
-def get_user_db():
+def get_user_db() -> psycopg.Connection:
     if "user_db" not in g:
         g.user_db = psycopg.connect(
             host="localhost",
@@ -25,11 +25,17 @@ def close_user_db(event=None):
         db.close()
 
 
-def get_data_db():
+def get_data_db() -> database.Database:
     if "data_db" not in g:
-        g.data_db = MongoDataWriter(override=False)
+        g.data_db = MongoClient(
+            host="localhost",
+            port=int(current_app.config["DB_DATA.PORT"]),
+            # username=base64.b64decode(current_app.config["DB_DATA.USER"]).decode(),
+            # password=base64.b64decode(current_app.config["DB_DATA.PASSWORD"]).decode()
+        )
+        g.data_db
         # g.db.row_factory = sqlite3.Row
-    return g.data_db
+    return g.data_db[current_app.config["DB_DATA.DB_NAME"]]
 
 
 def close_data_db(event=None):

@@ -19,13 +19,12 @@ def setup_accounts(conn: Connection):
         )
         # create Tables if not exists
         if not cur.fetchone()[0]:
-            print("CREATE ACCOUNT TABLES")
             """
-                user_id: 4B
+            user_id: 4B
 
-                disable: 1B
-                created_on: 8B
-                lost_login: 8B
+            disable: 1B
+            created_on: 8B
+            lost_login: 8B
             """
             cur.execute(
                 """

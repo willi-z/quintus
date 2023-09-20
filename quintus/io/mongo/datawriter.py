@@ -8,12 +8,12 @@ class MongoDataWriter(DataWriter):
         self,
         host="localhost",
         port=27017,
-        databas="quintus",
+        database="quintus",
         document="materials",
         override=True,
     ) -> None:
         self.client = pymongo.MongoClient(host, port)
-        self.db = self.client[databas]
+        self.db = self.client[database]
         self.document = self.db[document]
         if override:
             self.document.drop()
