@@ -16,7 +16,7 @@ with secret_file.open("r") as fp:
 for key, val in secrete_config.items():
     os.environ[key] = val
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="frontend/static")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["DB_USER.DB_NAME"] = os.getenv("DB_USER.DB_NAME")
 app.config["DB_USER.PORT"] = os.getenv("DB_USER.PORT")

@@ -1,10 +1,13 @@
-import uuid
-import base64
 from flask import Blueprint, request, render_template, redirect, abort
 import flask_login as fl
 from quintus.server.helpers import login_user, get_user_db, get_data_db
 
-frontend = Blueprint("frontend", __name__, url_prefix="/", template_folder="templates")
+
+frontend = Blueprint(
+    "frontend",
+    __name__,
+    template_folder="templates",
+)
 
 
 @frontend.route("/")
@@ -52,26 +55,8 @@ def overview():
     return render_template("pages/overview.html", materials=materials)
 
 
-def generate_id():
-    identifier = uuid.uuid1()
-    only_upper = base64.b32encode(identifier.bytes).decode("utf-8")
-    short = only_upper[:8]
-    return short
-
-
-@frontend.route("/entry/<materialID>")
-def get_material(materialID):
-    if materialID == "new":
-        # create short!!! uuid
-        uid = generate_id()
-        # check if already exists if not generate again
-        db = get_data_db()
-        while any(True for _ in db.get_entry(uid)):
-            uid = generate_id()
-
-        # create empty entry
-        db.write_entry({"_id": uid})
-        # redirect to entry
-        return redirect(f"{frontend.url_prefix}/entry/{uid}", code=302)
-    else:
+@frontend.route("/data/<collection>/<documentID>")
+def get_material(collection, documentID):
+    if collection == "material":
         return render_template("pages/material.html")
+    return "NOT FOUND"
