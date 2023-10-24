@@ -1,34 +1,27 @@
-from quintus.evals.battery import FastBatterEvaluation
+from quintus.evals.battery import BatteryEvaluation
 from quintus.structures import get_SI_value, Measurement
 from quintus.evals.battery.helpers import get_active_layer
 from .model import WeightMaterial, ElectrodeMaterial
 
 
-class EnergyDensity(FastBatterEvaluation):
+class EnergyDensity(BatteryEvaluation):
     def __init__(self):
         super().__init__(
             "energy_density",
             "Wh/kg",
-            {
-                "anode": ElectrodeMaterial,
-                "cathode": ElectrodeMaterial,
-                "foil": WeightMaterial,
-                "separator": WeightMaterial,
-            },
-            {
-                "anode": "anode",
-                "cathode": "cathode",
-                "foil": "foil",
-                "separator": "separator",
-            },
+            anode=ElectrodeMaterial,
+            cathode=ElectrodeMaterial,
+            foil=WeightMaterial,
+            separator=WeightMaterial,
         )
 
-    def compute(self, **kwargs) -> float:
-        anode = ElectrodeMaterial(**kwargs["anode"])
-        cathode = ElectrodeMaterial(**kwargs["cathode"])
-        foil = WeightMaterial(**kwargs["foil"])
-        separator = WeightMaterial(**kwargs["separator"])
-
+    def compute_battery(
+        self,
+        anode: ElectrodeMaterial,
+        cathode: ElectrodeMaterial,
+        foil: WeightMaterial,
+        separator: WeightMaterial,
+    ) -> float:
         active_layer = get_active_layer(anode)
         areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
         # layers = Measurement(**active_layer.__dict__.get("layers"))

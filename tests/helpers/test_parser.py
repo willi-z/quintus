@@ -4,7 +4,7 @@ import numpy as np
 
 
 @pytest.mark.parametrize(
-    "unit, value", [("cm^2", 1e-4), ("mg/cm^2", 1e-2), ("mAh/g", 3600)]
+    "unit, value", [("mA", 1e-3), ("cm^2", 1e-4), ("mg/cm^2", 1e-2), ("mAh/g", 3600)]
 )
 def test_units(unit: str, value):
     assert np.isclose(parse_unit(unit), value)

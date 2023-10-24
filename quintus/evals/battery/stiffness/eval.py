@@ -25,12 +25,13 @@ class StiffnessEvaluation(FastBatterEvaluation):
             },
         )
 
-    def compute(self, **kwargs) -> float:
-        anode = StiffMaterial(**kwargs["anode"])
-        cathode = StiffMaterial(**kwargs["cathode"])
-        foil = StiffMaterial(**kwargs["foil"])
-        separator = StiffMaterial(**kwargs["separator"])
-
+    def compute_battery(
+        self,
+        anode: StiffMaterial,
+        cathode: StiffMaterial,
+        foil: StiffMaterial,
+        separator: StiffMaterial,
+    ) -> float:
         layup = [foil]
         for i in range(NUM_ELECTRODE_LAYERS):
             if OUTER_ELECTRODE_LAYER == "cathode":

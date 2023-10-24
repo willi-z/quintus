@@ -1,7 +1,6 @@
 from flask import Blueprint, request
+from quintus.helpers.id_generation import generate_id
 from quintus.server.helpers.db import get_data_db
-import uuid
-import base64
 
 
 data = Blueprint("data", __name__, url_prefix="/data")
@@ -45,13 +44,6 @@ def request_entry(collection: str, id: str):
         return "No Entry with this ID was found!", 404
 
     return result, 200, {"Content-Type": "application/json"}
-
-
-def generate_id():
-    identifier = uuid.uuid1()
-    only_upper = base64.b32encode(identifier.bytes).decode("utf-8")
-    short = only_upper[:8]
-    return short
 
 
 @data.route("/<collection>/<id>", methods=["POST"])

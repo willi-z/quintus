@@ -36,13 +36,22 @@ sort_units_by_priority()
 
 
 def parse_unit(unit: str) -> float:
+    """
+
+    creates an numerical expression, wich can be evaluted in the end with eval
+    """
+
     for key in units:
+        # check each unit in list
         index = unit.find(key)
         if index != -1:
+            # if unit exists in expression
+            # replace it with the value
             unit = unit.replace(key, str(units.get(key)))
             if index - 1 <= 0:
                 continue
             if unit[index - 1].isalpha() or unit[index - 1].isnumeric():
+                """ """
                 unit = unit[:index] + "*" + unit[index:]
 
     for key in operators:

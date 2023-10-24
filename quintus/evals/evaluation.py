@@ -35,6 +35,19 @@ class BasicEvaluation(Evaluation):
         unit: str | None,
         filters: dict[str, dict] | None,
     ):
+        """Searches for a component with the help of a filter,
+        then computes one property and returns the property value with
+        a certain unit.
+
+        Parameters
+        ----------
+        name : str
+            name of the property
+        unit : str | None
+            unit of the property
+        filters : dict[str, dict] | None
+            search filter for vaible components
+        """
         self.name = name
         self.unit = unit
         self.filters = filters

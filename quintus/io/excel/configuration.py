@@ -3,7 +3,7 @@ from .pointers import Pointers
 from .flag import Flag
 
 
-class ExcelSheet(BaseModel):
+class ExcelSheetConfiguration(BaseModel):
     flag: Flag
     pointers: Pointers = None
     transforms: dict[str, str] = None
@@ -11,7 +11,7 @@ class ExcelSheet(BaseModel):
 
 class ExcelConfiguration(BaseModel):
     ignore: list[str] = None
-    sheets: dict[str, ExcelSheet] = None
+    sheets: dict[str, ExcelSheetConfiguration] = None
     pointers: Pointers = None
     transforms: dict[str, str] = None
 

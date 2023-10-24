@@ -1,5 +1,5 @@
 from quintus.io.datawriter import DataWriter
-from typing import Iterator
+from quintus.structures import Component
 import pymongo
 
 
@@ -18,11 +18,9 @@ class MongoDataWriter(DataWriter):
         if override:
             self.document.drop()
 
-    def write_entry(self, entry: dict, filter: dict = None):
-        if filter is None:
-            self.document.insert_one(entry)
+    def write_entry(self, entry: Component, override=True):
+        content = entry.dict(exclude_unset=True, exclude_none=True)
+        if override is True:
+            self.document.insert_one(content)
         else:
-            self.document.update_one(filter, {"$set": entry})
-
-    def get_entry(self, id: str) -> Iterator[dict]:
-        return self.document.find({"_id": id})
+            self.document.update_one({"_id": entry._id}, content, upsert=True)

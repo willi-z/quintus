@@ -1,16 +1,34 @@
 from quintus.io import DataWriter
 from openpyxl import load_workbook
+from openpyxl.worksheet.worksheet import Worksheet
 import json
 from pathlib import Path
-from quintus.structures import Material, ValidationError
-from .configuration import ExcelConfiguration, update_config, ExcelSheet
+from quintus.structures import Component, ValidationError, Measurement
+from quintus.helpers.id_generation import generate_id
+from .configuration import ExcelConfiguration, update_config, ExcelSheetConfiguration
+from .legend import ExcelValueLegend
 from quintus.helpers.parser import parse_value
-from typing import cast
 import warnings
 
 
 class ExcelReader:
     def __init__(self, filename: str, config_file: str, writer: DataWriter):
+        """Reads an Excel sheet with Data of ifferent components.
+        Components can be grouped via the sheet name
+        Values are color coded by a legend at the top left corner
+        A pointers are used to find the table head and values
+
+
+        Parameters
+        ----------
+        filename : str
+            _description_
+        config_file : str
+            _description_
+        writer : DataWriter
+            _description_
+
+        """
         self.wb = load_workbook(filename=filename, data_only=True, read_only=True)
 
         with Path(config_file).open() as fp:
@@ -22,6 +40,9 @@ class ExcelReader:
             print(ex)
 
         self.writer = writer
+
+    def get_config(self) -> ExcelConfiguration:
+        return self.config
 
     def read_all(self):
         sheets_names = self.wb.sheetnames
@@ -35,106 +56,110 @@ class ExcelReader:
             sheet_config = self.config.sheets.get(sheet_name).dict()
             self.read_sheet(sheet_name, update_config(master_config, sheet_config))
 
+    def read_prefixes(
+        self, sheet: Worksheet, config: ExcelSheetConfiguration
+    ) -> list[str]:
+        prefixes = []
+        prefix_row = config.pointers.prefix
+        for row in sheet.iter_rows(prefix_row, prefix_row):  # should only be one
+            for cell in row:
+                prefixes.append(cell.value)
+        return prefixes
+
+    def read_names(
+        self, sheet: Worksheet, config: ExcelSheetConfiguration
+    ) -> list[str]:
+        names = []
+        names_row = config.pointers.names
+        for row in sheet.iter_rows(names_row, names_row):  # should only be one
+            for cell in row:
+                names.append(cell.value)
+        return names
+
+    def read_units(
+        self, sheet: Worksheet, config: ExcelSheetConfiguration
+    ) -> list[str]:
+        units = []
+        units_row = config.pointers.units
+        for row in sheet.iter_rows(units_row, units_row):  # should only be one
+            for cell in row:
+                units.append(cell.value)
+        return units
+
     def read_sheet(self, name: str, config: dict):
         sheet = self.wb[name]
-        config = ExcelSheet(**config)
-        prefix = []
-        names = []
-        units = []
-        row_number = 0
-        for row in sheet.values:
-            row_number += 1
-            prefix_row = config.pointers.prefix
-            if prefix_row is not None:
-                if prefix_row == row_number:
-                    for value in row:
-                        prefix.append(value)
+        config = ExcelSheetConfiguration(**config)
+        legend = ExcelValueLegend(sheet)
+        prefix = self.read_prefixes(sheet, config)
+        names = self.read_names(sheet, config)
+        units = self.read_units(sheet, config)
 
-            names_row = config.pointers.names
-            if names_row is not None:
-                if names_row == row_number:
-                    for value in row:
-                        names.append(str(value).replace(" ", "_"))
+        start_row = config.pointers.start
+        for row in sheet.iter_rows(start_row):
+            component = Component(_id=generate_id())
 
-            units_row = config.pointers.units
-            if units_row is not None:
-                if units_row == row_number:
-                    for value in row:
-                        units.append(value)
+            if component.tags is None:
+                component.tags = set()
 
-            start_row = config.pointers.start
-            if start_row is not None:
-                if start_row <= row_number:
-                    material_data = dict()
-                    layer_ids = list()
+            if config.flag is not None:
+                component.tags.add(config.flag.flag_as)
 
-                    if config.flag is not None:
-                        flag_field = config.flag.field
-                    if material_data.get(flag_field) is None:
-                        material_data[flag_field] = []
-                    material_data[flag_field].append(config.flag.flag_as)
+            for i in range(len(row)):
+                cell = row[i]
+                if cell.value is None:
+                    continue
 
-                    for i in range(len(row)):
-                        cell_val = row[i]
-                        if cell_val is None:
-                            continue
+                cell_name = names[i]
+                cell_unit = units[i]
+                cell_prefix = prefix[i]
 
-                        cell_name = names[i]
-                        cell_unit = units[i]
-                        cell_prefix = prefix[i]
+                if cell_name == "material":
+                    cell_name = "name"
+                elif cell_name.lower() in {"sources", "comment"}:
+                    continue
 
-                        value = {"value": cell_val}
-                        if isinstance(cell_val, str):
-                            if "+/-" in cell_val:
-                                cell_val, tol = parse_value(cell_val)
-                                value = {"value": cell_val, "tol": tol}
-                        if cell_unit is not None:
-                            value.update({"unit": cell_unit})
+                entry = component
+                if cell_prefix is not None:
+                    if not cell_prefix.startswith("{"):
+                        if component.compostion is None:
+                            component.compostion = dict()
+                        if cell_prefix not in component.compostion.keys():
+                            entry = Component(_id=generate_id())
+                            component.compostion[cell_prefix] = entry
 
-                        if cell_name in {"name", "description", "material"}:
-                            value = cell_val
+                if cell_name == "name":
+                    if cell.value is None:
+                        break
+                    entry.name = cell.value
+                elif cell_name == "description":
+                    entry.description = cell.value
+                else:
+                    value = {"value": cell.value}
+                    if isinstance(cell.value, str):
+                        if "+/-" in cell.value:
+                            cell_val, tol = parse_value(cell.value)
+                            value = {"value": cell_val, "tol": tol}
+                    if cell_unit is not None:
+                        value.update({"unit": cell_unit})
+                    if cell_prefix is not None:
+                        if cell_prefix.startswith("{"):  # is a json
+                            measured_at = json.loads(cell_prefix)
+                            value.update({"at": measured_at})
 
-                        if cell_prefix is not None:
-                            if "layer" in cell_prefix:
-                                if material_data.get("layers") is None:
-                                    material_data["layers"] = list()
+                    source = legend.get_value_type(cell)
+                    if source is not None:
+                        value.update({"source": source})
 
-                                if cell_prefix not in layer_ids:
-                                    layer_ids.append(cell_prefix)
-                                    material_data["layers"].append(
-                                        {"description": cell_prefix}
-                                    )
-                                layer_id = layer_ids.index(cell_prefix)
-
-                                layer = cast(dict, material_data["layers"][layer_id])
-                                layer.update({cell_name: value})
-                                continue
-                            else:
-                                measured_at = json.loads(cell_prefix)
-                                value.update({"at": measured_at})
-
-                        material_data.update({cell_name: value})
-
+                    if entry.properties is None:
+                        entry.properties = dict()
                     try:
-                        if len(material_data.keys()) <= 1:
-                            # empty line
-                            continue
-
-                        material = Material(**material_data)
-                        self.writer.write_entry(
-                            material.dict(exclude_unset=True, exclude_none=True)
-                        )
-                        # pprint(material.dict())
+                        entry.properties[cell_name] = Measurement(**value)
                     except ValidationError:
-                        # warnings.warn(
-                        #     "Problems when trying to read entry "
-                        #     +f"at sheet {name} in row {row_number}"
-                        #     )
+                        raise ValidationError(
+                            f"Measurment {cell_name} from {entry.name} is not valid."
+                        )
 
-                        if "name" not in material_data.keys():
-                            warnings.warn("Could not find a name.")
-                        else:
-                            warnings.warn(
-                                "Something went wrong when trying to read "
-                                f"{material_data['name']}"
-                            )
+            if not component.is_valid():
+                warnings.warn(f"Component with name {entry.name} is not valid!")
+
+            self.writer.write_entry(component)
