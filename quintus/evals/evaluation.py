@@ -83,7 +83,9 @@ class BasicEvaluation(Evaluation):
         Returns
         -------
         dict[str, dict]
-            _description_
+            key is the argument needed during computation.
+            dict is filter using the query system from MongoDB
+            (see: https://www.mongodb.com/docs/manual/tutorial/query-documents/)
         """
         return self.filters
 
