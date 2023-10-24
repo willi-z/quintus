@@ -22,8 +22,10 @@ def generate_attribute_filter(cls: Type[BaseModel] | None) -> dict:
         return None
     else:
         attr_filter = []
-        for key in cls.__fields__.keys():
-            attr_filter.append({key: {"$exists": True}})
+        for attr, field in cls.__fields__.items():
+            if not field.required:
+                continue
+            attr_filter.append({attr: {"$exists": True}})
     return {"$and": attr_filter}
 
 
@@ -70,7 +72,7 @@ class BatteryEvaluation(BasicEvaluation):
     ) -> float:
         pass
 
-    def compute(self, **kwargs) -> float:
+    def __compute__(self, **kwargs) -> float:
         anode = convert(self.anode_cls, **kwargs["anode"])
         cathode = convert(self.cathode_cls, **kwargs["cathode"])
         foil = convert(self.foil_cls, **kwargs["foil"])

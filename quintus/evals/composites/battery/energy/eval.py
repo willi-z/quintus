@@ -1,6 +1,6 @@
-from quintus.evals.battery import BatteryEvaluation
+from quintus.evals.composites.battery.evaluation import BatteryEvaluation
+from quintus.evals.composites.battery.helpers import get_active_layer
 from quintus.structures import get_SI_value, Measurement
-from quintus.evals.battery.helpers import get_active_layer
 from .model import WeightMaterial, ElectrodeMaterial
 
 

@@ -1,26 +1,21 @@
-from quintus.evals.battery import BatteryEvaluation
-from quintus.structures import Material, get_SI_value, Measurement
-from quintus.evals.battery.helpers import get_active_layer
+from quintus.evals.evaluation import BasicEvaluation
+from quintus.structures import Component, get_SI_value, Measurement
+from quintus.evals.composites.battery.helpers import get_active_layer
 
 
-class ElectrodeCapacityCalc(BatteryEvaluation):
+class ElectrodeCapacityCalc(BasicEvaluation):
     def __init__(self):
         name = "areal_capacity"
 
         layers_filter = {
-            "layers": {
-                "$elemMatch": {
-                    "description": {"$eq": "active layer"},
-                    "areal_capacity": {"$exists": True},
-                }
-            }
+            "composites": {"active layer": {"areal_capacity": {"$exists": True}}}
         }
 
         filters = {name: layers_filter}
-        super().__init__(name, "C/m^2", filters, False)
+        super().__init__(name, "C/m^2", filters)
 
-    def compute(self, **kwargs) -> float:
-        electrode = Material(**kwargs[self.name])
+    def __compute__(self, **kwargs) -> float:
+        electrode = Component(**kwargs[self.name])
         active_layer = get_active_layer(electrode)
         areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
         return get_SI_value(areal_capacity)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from quintus.evals.battery import BatteryEvaluation
+from quintus.evals.composites.battery.evaluation import BatteryEvaluation
 from .model import Electrode
 from ..constants import NUM_ELECTRODE_LAYERS, OUTER_ELECTRODE_LAYER
 from quintus.structures import get_SI_value

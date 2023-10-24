@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from quintus.structures import Measurement
+from quintus.helpers import parse_unit
 
 
 class Evaluation(ABC):
@@ -53,18 +54,51 @@ class BasicEvaluation(Evaluation):
         self.filters = filters
 
     @abstractmethod
-    def compute(self, **kwargs) -> float:
+    def __compute__(self, **kwargs) -> float:
+        """Override the method to describe the evaluation computation.
+        Don't call this method directly!
+        It is meant to be called by evalute().
+
+        Returns
+        -------
+        float
+            value in SI units, the conversion to the
+            given unit is done when it is called by evaluate!
+        """
         pass
 
     def get_result_names(self) -> set[str]:
+        """_summary_
+
+        Returns
+        -------
+        set[str]
+            _description_
+        """
         return {self.name}
 
     def filter_per_args(self) -> dict[str, dict]:
+        """Filter per argument requred by the evaluation compute function.
+
+        Returns
+        -------
+        dict[str, dict]
+            _description_
+        """
         return self.filters
 
-    def evaluate(self, **kwargs) -> dict[str, dict]:
+    def evaluate(self, **kwargs) -> dict[str, Measurement]:
+        """_summary_
+
+        Returns
+        -------
+        dict[str, dict]
+            _description_
+        """
         validate_kwargs(self.filter_per_args(), True, **kwargs)
         measurement = Measurement(
-            value=self.compute(**kwargs), unit=self.unit, source="computation"
+            value=self.__compute__(**kwargs) / parse_unit(self.unit),
+            unit=self.unit,
+            source="computation",
         )
-        return {self.name: measurement.dict(exclude_unset=True, exclude_none=True)}
+        return {self.name: measurement}

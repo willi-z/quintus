@@ -1,4 +1,4 @@
-from quintus.evals.battery import FastBatterEvaluation
+from quintus.evals.composites.battery.evaluation import BatteryEvaluation
 from .model import StiffMaterial
 from ..constants import OUTER_ELECTRODE_LAYER, NUM_ELECTRODE_LAYERS
 from quintus.structures import get_SI_value
@@ -6,23 +6,15 @@ from pymaterial.materials import IsotropicMaterial, TransverselyIsotropicMateria
 from pymaterial.combis.clt import Stackup, Ply
 
 
-class StiffnessEvaluation(FastBatterEvaluation):
+class StiffnessEvaluation(BatteryEvaluation):
     def __init__(self):
         super().__init__(
             "stiffness",
             "N/m^2",
-            {
-                "anode": StiffMaterial,
-                "cathode": StiffMaterial,
-                "foil": StiffMaterial,
-                "separator": StiffMaterial,
-            },
-            {
-                "anode": "anode",
-                "cathode": "cathode",
-                "foil": "foil",
-                "separator": "separator",
-            },
+            anode_cls=StiffMaterial,
+            cathode_cls=StiffMaterial,
+            foil_cls=StiffMaterial,
+            separator_cls=StiffMaterial,
         )
 
     def compute_battery(
