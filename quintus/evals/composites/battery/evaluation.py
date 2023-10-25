@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from quintus.evals import BasicEvaluation
 from pydantic import BaseModel
+from quintus.structures.component import Component
 from typing import Type
 
 
@@ -22,10 +23,12 @@ def generate_attribute_filter(cls: Type[BaseModel] | None) -> dict:
         return None
     else:
         attr_filter = []
+
         for attr, field in cls.__fields__.items():
-            if not field.required:
-                continue
-            attr_filter.append({attr: {"$exists": True}})
+            if field is not None:
+                {attr: generate_attribute_filter(field)}
+            else:
+                attr_filter.append({attr: {"$exists": True}})
     return {"$and": attr_filter}
 
 
@@ -41,10 +44,10 @@ class BatteryEvaluation(BasicEvaluation):
         self,
         name: str,
         unit: str | None,
-        anode_cls: Type[BaseModel] = None,
-        cathode_cls: Type[BaseModel] = None,
-        foil_cls: Type[BaseModel] = None,
-        separator_cls: Type[BaseModel] = None,
+        anode_cls: Type[Component] = None,
+        cathode_cls: Type[Component] = None,
+        foil_cls: Type[Component] = None,
+        separator_cls: Type[Component] = None,
     ):
         self.anode_cls = anode_cls
         self.cathode_cls = cathode_cls
@@ -65,10 +68,10 @@ class BatteryEvaluation(BasicEvaluation):
     @abstractmethod
     def compute_battery(
         self,
-        anode: BaseModel,
-        cathode: BaseModel,
-        foil: BaseModel,
-        separator: BaseModel,
+        anode: Component,
+        cathode: Component,
+        foil: Component,
+        separator: Component,
     ) -> float:
         pass
 

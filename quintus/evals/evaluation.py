@@ -6,10 +6,30 @@ from quintus.helpers import parse_unit
 class Evaluation(ABC):
     @abstractmethod
     def get_result_names(self) -> set[str]:
+        """Returns the names of all results generated.
+        Usefull when trying to figure out cross dependecies
+        without the need for computing the evaluation.
+
+        Returns
+        -------
+        set[str]
+            the names/keys of all computed results
+            provided by the evaluate() function
+            (the "set" prevents the usage the same names)
+        """
         pass
 
     @abstractmethod
     def filter_per_args(self) -> dict[str, dict]:
+        """Filter per argument requred by the evaluation compute function.
+
+        Returns
+        -------
+        dict[str, dict]
+            key is the argument needed during computation.
+            dict is filter using the query system from MongoDB
+            (see: https://www.mongodb.com/docs/manual/tutorial/query-documents/)
+        """
         pass
 
     @abstractmethod
@@ -37,7 +57,7 @@ class BasicEvaluation(Evaluation):
         filters: dict[str, dict] | None,
     ):
         """Searches for a component with the help of a filter,
-        then computes one property and returns the property value with
+        then computes a single property and returns the property value with
         a certain unit.
 
         Parameters
@@ -68,12 +88,15 @@ class BasicEvaluation(Evaluation):
         pass
 
     def get_result_names(self) -> set[str]:
-        """_summary_
-
+        """Returns the names of all results generated.
+        Usefull when trying to figure out cross dependecies
+        without the need for computing the evaluation.
         Returns
         -------
         set[str]
-            _description_
+            the names/keys of all computed results
+            provided by the evaluate() function
+            (the "set" prevents the usage the same names)
         """
         return {self.name}
 
@@ -90,12 +113,13 @@ class BasicEvaluation(Evaluation):
         return self.filters
 
     def evaluate(self, **kwargs) -> dict[str, Measurement]:
-        """_summary_
+        """main function to call when runing the
 
         Returns
         -------
         dict[str, dict]
-            _description_
+            keys are the same as given by get_results_names()
+            Values are the results
         """
         validate_kwargs(self.filter_per_args(), True, **kwargs)
         measurement = Measurement(

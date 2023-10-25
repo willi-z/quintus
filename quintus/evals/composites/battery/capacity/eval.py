@@ -1,6 +1,5 @@
-from pydantic import BaseModel
 from quintus.evals.composites.battery.evaluation import BatteryEvaluation
-from .model import Electrode
+from .model import ElectrodeComponent
 from ..constants import NUM_ELECTRODE_LAYERS, OUTER_ELECTRODE_LAYER
 from quintus.structures import get_SI_value
 import numpy as np
@@ -8,14 +7,17 @@ import numpy as np
 
 class CapacityEvaluation(BatteryEvaluation):
     def __init__(self):
-        super().__init__("areal_capacity", "C/m^2", anode=Electrode, cathode=Electrode)
+        super().__init__(
+            "areal_capacity",
+            "C/m^2",
+            anode=ElectrodeComponent,
+            cathode=ElectrodeComponent,
+        )
 
     def compute_battery(
         self,
-        anode: Electrode,
-        cathode: Electrode,
-        foil: BaseModel,
-        separator: BaseModel,
+        anode: ElectrodeComponent,
+        cathode: ElectrodeComponent,
     ) -> float:
         anode_capacity = get_SI_value(anode.areal_capacity)
         cathode_capacity = get_SI_value(cathode.areal_capacity)

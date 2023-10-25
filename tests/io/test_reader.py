@@ -1,5 +1,6 @@
 from quintus.io.datawriter import DataWriter
 from quintus.io.excel.reader import ExcelReader
+from quintus.structures import Component
 
 
 def test_reader():
@@ -7,9 +8,9 @@ def test_reader():
         def __init__(self):
             self.data = dict()
 
-        def write_entry(self, entry: dict) -> None:
-            key = entry["name"]
-            self.data[key] = entry
+        def write_entry(self, entry: Component) -> None:
+            key = entry.name
+            self.data[key] = entry.dict()
 
     writer = TestWriter()
     reader = ExcelReader(

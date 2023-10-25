@@ -47,8 +47,9 @@ class ExcelReader:
     def read_all(self):
         sheets_names = self.wb.sheetnames
         for sheet_name in sheets_names:
-            if sheet_name in self.config.ignore:
-                continue
+            if self.config.ignore is not None:
+                if sheet_name in self.config.ignore:
+                    continue
 
             master_config = self.config.dict()
             master_config.pop("ignore")
@@ -113,9 +114,7 @@ class ExcelReader:
                 cell_unit = units[i]
                 cell_prefix = prefix[i]
 
-                if cell_name == "material":
-                    cell_name = "name"
-                elif cell_name.lower() in {"sources", "comment"}:
+                if cell_name.lower() in {"sources", "comment"}:
                     continue
 
                 entry = component
@@ -126,6 +125,10 @@ class ExcelReader:
                         if cell_prefix not in component.compostion.keys():
                             entry = Component(_id=generate_id())
                             component.compostion[cell_prefix] = entry
+                        else:
+                            entry = component.compostion[cell_prefix]
+                        if cell_name == "material":
+                            cell_name = "name"
 
                 if cell_name == "name":
                     if cell.value is None:
@@ -160,6 +163,6 @@ class ExcelReader:
                         )
 
             if not component.is_valid():
-                warnings.warn(f"Component with name {entry.name} is not valid!")
+                warnings.warn(f"Component with name {component.name} is not valid!")
 
             self.writer.write_entry(component)

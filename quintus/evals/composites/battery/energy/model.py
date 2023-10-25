@@ -1,12 +1,21 @@
-from quintus.structures import Measurement, Material
+from pydantic import BaseModel
+from quintus.structures import Measurement, Component
 
 
-class ElectrodeMaterial(Material):
+class ElectrodeMeasurments(BaseModel):
     potential_vs_Li: Measurement
     thickness: Measurement
     density: Measurement
 
 
-class WeightMaterial(Material):
+class ElectrodeComponent(Component):
+    properties: ElectrodeMeasurments
+
+
+class WeightMeasurments(BaseModel):
     thickness: Measurement
     density: Measurement
+
+
+class WeightComponent(Component):
+    properties: WeightMeasurments

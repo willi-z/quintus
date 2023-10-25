@@ -3,6 +3,20 @@ import warnings
 
 
 def calc_config_indeces(index: int, sizes: list[int]) -> list[int]:
+    """_summary_
+
+    Parameters
+    ----------
+    index : int
+        _description_
+    sizes : list[int]
+        _description_
+
+    Returns
+    -------
+    list[int]
+        _description_
+    """
     indeces = [0] * len(sizes)
     digit = 0
     while index > 0:

@@ -1,7 +1,7 @@
 from quintus.evals.composites.battery.evaluation import BatteryEvaluation
 from quintus.evals.composites.battery.helpers import get_active_layer
 from quintus.structures import get_SI_value, Measurement
-from .model import WeightMaterial, ElectrodeMaterial
+from .model import WeightComponent, ElectrodeComponent
 
 
 class EnergyDensity(BatteryEvaluation):
@@ -9,18 +9,18 @@ class EnergyDensity(BatteryEvaluation):
         super().__init__(
             "energy_density",
             "Wh/kg",
-            anode=ElectrodeMaterial,
-            cathode=ElectrodeMaterial,
-            foil=WeightMaterial,
-            separator=WeightMaterial,
+            anode=ElectrodeComponent,
+            cathode=ElectrodeComponent,
+            foil=WeightComponent,
+            separator=WeightComponent,
         )
 
     def compute_battery(
         self,
-        anode: ElectrodeMaterial,
-        cathode: ElectrodeMaterial,
-        foil: WeightMaterial,
-        separator: WeightMaterial,
+        anode: ElectrodeComponent,
+        cathode: ElectrodeComponent,
+        foil: WeightComponent,
+        separator: WeightComponent,
     ) -> float:
         active_layer = get_active_layer(anode)
         areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
