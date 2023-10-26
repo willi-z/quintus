@@ -10,8 +10,8 @@ class CapacityEvaluation(BatteryEvaluation):
         super().__init__(
             "areal_capacity",
             "C/m^2",
-            anode=ElectrodeComponent,
-            cathode=ElectrodeComponent,
+            anode=ElectrodeComponent(),
+            cathode=ElectrodeComponent(),
         )
 
     def compute_battery(

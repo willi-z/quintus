@@ -3,7 +3,7 @@ import re
 
 
 class Measurement(BaseModel):
-    value: float
+    value: float = None
     unit: str = "1"
     tol: tuple[float] | list[float] = None
     source: str = None
@@ -41,3 +41,8 @@ class Measurement(BaseModel):
             if len(p.findall(val)) > 0:
                 return val
         raise ValueError("Source did not match!")
+
+    def is_empty(self) -> bool:
+        if self.value is None:
+            return True
+        return False

@@ -1,18 +1,20 @@
-from quintus.io import DataWriter
+# from ..__base__.datawriter import DataWriter
+from quintus.structures import Component, ValidationError, Measurement
+from quintus.helpers.id_generation import generate_id
+from quintus.helpers.parser import parse_value
+
+from .configuration import ExcelConfiguration, update_config, ExcelSheetConfiguration
+from .legend import ExcelValueLegend
+
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import json
 from pathlib import Path
-from quintus.structures import Component, ValidationError, Measurement
-from quintus.helpers.id_generation import generate_id
-from .configuration import ExcelConfiguration, update_config, ExcelSheetConfiguration
-from .legend import ExcelValueLegend
-from quintus.helpers.parser import parse_value
 import warnings
 
 
 class ExcelReader:
-    def __init__(self, filename: str, config_file: str, writer: DataWriter):
+    def __init__(self, filename: str, config_file: str, writer):  # : DataWriter
         """Reads an Excel sheet with Data of ifferent components.
         Components can be grouped via the sheet name
         Values are color coded by a legend at the top left corner
@@ -50,6 +52,9 @@ class ExcelReader:
             if self.config.ignore is not None:
                 if sheet_name in self.config.ignore:
                     continue
+
+            if sheet_name not in self.config.sheets:
+                continue
 
             master_config = self.config.dict()
             master_config.pop("ignore")
@@ -114,25 +119,31 @@ class ExcelReader:
                 cell_unit = units[i]
                 cell_prefix = prefix[i]
 
+                if cell_name is None:
+                    cell_name = names[i - 1]
+
                 if cell_name.lower() in {"sources", "comment"}:
                     continue
 
                 entry = component
                 if cell_prefix is not None:
                     if not cell_prefix.startswith("{"):
-                        if component.compostion is None:
-                            component.compostion = dict()
-                        if cell_prefix not in component.compostion.keys():
+                        if component.composition is None:
+                            component.composition = dict()
+                        if cell_prefix not in component.composition.keys():
                             entry = Component(_id=generate_id())
-                            component.compostion[cell_prefix] = entry
+                            component.composition[cell_prefix] = entry
                         else:
-                            entry = component.compostion[cell_prefix]
+                            entry = component.composition[cell_prefix]
                         if cell_name == "material":
                             cell_name = "name"
 
+                if cell.value is None:
+                    continue
+                if cell.value in {"-", "#DIV/0!"}:
+                    continue
+
                 if cell_name == "name":
-                    if cell.value is None:
-                        break
                     entry.name = cell.value
                 elif cell_name == "description":
                     entry.description = cell.value
@@ -158,11 +169,30 @@ class ExcelReader:
                     try:
                         entry.properties[cell_name] = Measurement(**value)
                     except ValidationError:
-                        raise ValidationError(
+                        warnings.warn(
                             f"Measurment {cell_name} from {entry.name} is not valid."
+                            + f" (found in cell '{cell.coordinate}' "
+                            + f"in sheet: '{sheet.title}')"
                         )
 
-            if not component.is_valid():
-                warnings.warn(f"Component with name {component.name} is not valid!")
+            warnings.filterwarnings("error")
+            try:
+                component.warn_if_not_valid()
+            except RuntimeWarning as warn:
+                detail = ""
+                if cell.data_type != "n":
+                    detail = (
+                        f" (found in cell '{cell.coordinate}' "
+                        + f"in sheet: '{sheet.title}')"
+                    )
+                msg = warn.args[0] + detail
+                warnings.resetwarnings()
+                warnings.warn(msg)
 
-            self.writer.write_entry(component)
+            component.clear_empty()
+            if component.is_valid():
+                self.writer.write_entry(component)
+            else:
+                warnings.warn(
+                    "After clearing empty entries the component is still not valid!"
+                )

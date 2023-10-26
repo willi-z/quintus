@@ -1,11 +1,5 @@
-from pydantic import BaseModel
-from quintus.structures import Measurement, Component
-
-
-class ElectrodeMeasurments(BaseModel):
-    # thickness: Measurement
-    areal_capacity: Measurement
+from quintus.structures import Component, Measurement
 
 
 class ElectrodeComponent(Component):
-    properties: ElectrodeMeasurments
+    properties: dict[str, Measurement] = {"areal_capacity": Measurement()}

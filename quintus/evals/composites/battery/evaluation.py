@@ -1,51 +1,14 @@
 from abc import abstractmethod
 from quintus.evals import BasicEvaluation
-from pydantic import BaseModel
-from pydantic.fields import ModelField
 from quintus.structures.component import Component
-from typing import Type, cast
+from quintus.structures.helpers import component_to_filter
 
 
-def generate_attribute_filter(cls: Type[BaseModel] | None) -> dict:
-    """_summary_
-
-    Parameters
-    ----------
-    cls : Type[BaseModel] | None
-        _description_
-
-    Returns
-    -------
-    dict
-        filter using the query system from MongoDB
-        (see: https://www.mongodb.com/docs/manual/tutorial/query-documents/)
-    """
+def convert(cls: Component | None, **kwargs):
     if cls is None:
         return None
     else:
-        attr_filter = {}
-
-        for attr, field in cls.__fields__.items():
-            if isinstance(field, ModelField):
-                field = cast(ModelField, field)
-            else:
-                continue
-
-            if not field.required:
-                continue
-
-            if attr == "properties":
-                attr_filter[attr] = generate_attribute_filter(field.type_)
-            else:
-                attr_filter[attr] = {"$exists": True}
-    return attr_filter
-
-
-def convert(cls: Type[BaseModel] | None, **kwargs):
-    if cls is None:
-        return None
-    else:
-        return cls(**kwargs)
+        return cls.__class__(**kwargs)
 
 
 class BatteryEvaluation(BasicEvaluation):
@@ -53,24 +16,24 @@ class BatteryEvaluation(BasicEvaluation):
         self,
         name: str,
         unit: str | None,
-        anode_cls: Type[Component] = None,
-        cathode_cls: Type[Component] = None,
-        foil_cls: Type[Component] = None,
-        separator_cls: Type[Component] = None,
+        anode: Component = None,
+        cathode: Component = None,
+        foil: Component = None,
+        separator: Component = None,
     ):
-        self.anode_cls = anode_cls
-        self.cathode_cls = cathode_cls
-        self.foil_cls = foil_cls
-        self.separator_cls = separator_cls
+        self.anode_cls = anode
+        self.cathode_cls = cathode
+        self.foil_cls = foil
+        self.separator_cls = separator
 
         super().__init__(
             name,
             unit,
             {
-                "anode": generate_attribute_filter(self.anode_cls),
-                "cathode": generate_attribute_filter(self.cathode_cls),
-                "foil": generate_attribute_filter(self.foil_cls),
-                "separator": generate_attribute_filter(self.separator_cls),
+                "anode": component_to_filter(self.anode_cls),
+                "cathode": component_to_filter(self.cathode_cls),
+                "foil": component_to_filter(self.foil_cls),
+                "separator": component_to_filter(self.separator_cls),
             },
         )
 

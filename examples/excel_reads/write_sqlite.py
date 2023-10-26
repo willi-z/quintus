@@ -1,4 +1,4 @@
-from my_secret_path import mypath  # str of directory
+from examples.secret_data.my_secret_path import mypath  # str of directory
 
 from quintus.io.excel import ExcelReader
 from quintus.io.sqlite import SqliteDataWriter

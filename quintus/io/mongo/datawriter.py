@@ -2,6 +2,8 @@ from quintus.io.datawriter import DataWriter
 from quintus.structures import Component
 import pymongo
 
+from quintus.structures.helpers import component_to_dict
+
 
 class MongoDataWriter(DataWriter):
     def __init__(
@@ -11,15 +13,19 @@ class MongoDataWriter(DataWriter):
         database="quintus",
         document="materials",
         override=True,
+        username: str = None,
+        password: str = None,
     ) -> None:
-        self.client = pymongo.MongoClient(host, port)
+        self.client = pymongo.MongoClient(
+            host, port, username=username, password=password
+        )
         self.db = self.client[database]
         self.document = self.db[document]
         if override:
             self.document.drop()
 
     def write_entry(self, entry: Component, override=True):
-        content = entry.dict(exclude_unset=True, exclude_none=True)
+        content = component_to_dict(entry)
         if override is True:
             self.document.insert_one(content)
         else:

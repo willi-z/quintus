@@ -4,6 +4,8 @@ from typing import Iterator
 from pathlib import Path
 import json
 
+from quintus.structures.helpers import component_to_dict
+
 
 class JSONDataWriter(DataWriter):
     def __init__(
@@ -21,7 +23,7 @@ class JSONDataWriter(DataWriter):
         if self.file.exists():
             with self.file.open() as fp:
                 content = json.load(fp)
-        new_content = json.loads(entry.json(exclude_unset=True, exclude_none=True))
+        new_content = component_to_dict(entry)
         content.append(new_content)
         with self.file.open("+w") as fp:
             json.dump(content, fp)

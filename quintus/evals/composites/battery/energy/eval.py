@@ -9,10 +9,10 @@ class EnergyDensity(BatteryEvaluation):
         super().__init__(
             "energy_density",
             "Wh/kg",
-            anode=ElectrodeComponent,
-            cathode=ElectrodeComponent,
-            foil=WeightComponent,
-            separator=WeightComponent,
+            anode=ElectrodeComponent(),
+            cathode=ElectrodeComponent(),
+            foil=WeightComponent(),
+            separator=WeightComponent(),
         )
 
     def compute_battery(

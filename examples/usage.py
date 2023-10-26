@@ -1,11 +1,11 @@
-from my_secret_path import mypath  # str of directory
+from examples.secret_data.my_secret_path import mypath  # str of directory
 
 from quintus.io.excel import ExcelReader
 from quintus.io.mongo import MongoDataWriter, MongoDataSet  # noqa
 
-from quintus.evals.battery.component import ElectrodeCapacityCalc
+from quintus.evals.composites.battery.component import ElectrodeCapacityCalc
 
-from quintus.evals.battery import (
+from quintus.evals.composites.battery import (
     CapacityEvaluation,  # noqa
     StiffnessEvaluation,
     EnergyDensity,

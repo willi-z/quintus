@@ -10,6 +10,8 @@ class MongoDataSet(DataSet):
         port=27017,
         database="quintus",
         document="materials",
+        username: str = None,
+        password: str = None,
         init_filter: dict | None = None,
     ) -> None:
         self.host_name = host
@@ -17,7 +19,9 @@ class MongoDataSet(DataSet):
         self.database_name = database
         self.document_name = document
 
-        self.client = pymongo.MongoClient(host, port)
+        self.client = pymongo.MongoClient(
+            host, port, username=username, password=password
+        )
         self.db = self.client[database]
         self.document = self.db[document]
         self.filter = init_filter

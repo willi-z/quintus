@@ -11,10 +11,10 @@ class StiffnessEvaluation(BatteryEvaluation):
         super().__init__(
             "stiffness",
             "N/m^2",
-            anode_cls=StiffComponent,
-            cathode_cls=StiffComponent,
-            foil_cls=StiffComponent,
-            separator_cls=StiffComponent,
+            anode=StiffComponent(),
+            cathode=StiffComponent(),
+            foil=StiffComponent(),
+            separator=StiffComponent(),
         )
 
     def compute_battery(
