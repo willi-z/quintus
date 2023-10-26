@@ -1,8 +1,9 @@
 from abc import abstractmethod
 from quintus.evals import BasicEvaluation
 from pydantic import BaseModel
+from pydantic.fields import ModelField
 from quintus.structures.component import Component
-from typing import Type
+from typing import Type, cast
 
 
 def generate_attribute_filter(cls: Type[BaseModel] | None) -> dict:
@@ -22,14 +23,22 @@ def generate_attribute_filter(cls: Type[BaseModel] | None) -> dict:
     if cls is None:
         return None
     else:
-        attr_filter = []
+        attr_filter = {}
 
         for attr, field in cls.__fields__.items():
-            if field is not None:
-                {attr: generate_attribute_filter(field)}
+            if isinstance(field, ModelField):
+                field = cast(ModelField, field)
             else:
-                attr_filter.append({attr: {"$exists": True}})
-    return {"$and": attr_filter}
+                continue
+
+            if not field.required:
+                continue
+
+            if attr == "properties":
+                attr_filter[attr] = generate_attribute_filter(field.type_)
+            else:
+                attr_filter[attr] = {"$exists": True}
+    return attr_filter
 
 
 def convert(cls: Type[BaseModel] | None, **kwargs):
