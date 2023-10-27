@@ -2,9 +2,8 @@ from .measurement import Measurement
 from .component import Component
 from pydantic import BaseModel
 from quintus.helpers import parse_unit
-import json
 from typing import cast
-from pydantic.fields import ModelField
+from pydantic.fields import FieldInfo
 
 
 def get_SI_value(measurement: Measurement) -> float:
@@ -24,7 +23,11 @@ def get_SI_tol(measurement: Measurement) -> tuple[float, float]:
 
 
 def component_to_dict(comp: Component) -> dict:
-    return json.loads(comp.json(exclude_unset=True, exclude_none=True))
+    # result = json.loads(comp.model_dump_json(exclude_unset=True, exclude_none=True))
+    return comp.model_dump(
+        exclude_none=True,
+        by_alias=True,
+    )
 
 
 def dict_to_component(content: dict) -> Component:
@@ -41,23 +44,29 @@ def component_to_filter(comp: Component, prefix: list[str] = None) -> dict:
 
     if prefix is None:
         prefix = []
+    else:
+        print(prefix)
 
     fields = None
     if issubclass(comp.__class__, BaseModel):
-        fields = comp.__fields__
+        fields = comp.model_fields
     elif isinstance(comp, dict):
         fields = comp
 
     for attr, field in fields.items():
-        if isinstance(field, ModelField):
-            field = cast(ModelField, field)
+        if attr in {"identifier"}:
+            continue
+        if isinstance(field, FieldInfo):
+            field = cast(FieldInfo, field)
             if (content := field.default) is None:
                 continue
+        elif isinstance(field, Component):
+            new_prefix = [*prefix, attr]
+            attr_list = attr_list + component_to_filter(field, new_prefix)["$and"]
 
         if attr in {"properties", "composition"}:
-            attr_list = (
-                attr_list + component_to_filter(content, prefix + [attr])["$and"]
-            )
+            new_prefix = [*prefix, attr]
+            attr_list = attr_list + component_to_filter(content, new_prefix)["$and"]
         else:
             attr_name = ".".join(prefix + [attr])
             attr_list.append({attr_name: {"$exists": True}})

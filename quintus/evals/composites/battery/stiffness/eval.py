@@ -42,26 +42,29 @@ class StiffnessEvaluation(BatteryEvaluation):
 
         plies = []
         for layer in layup:
-            if layer.E_t_yy is None:
+            layer_properties = layer.properties
+            if layer_properties.get("E_t_yy") is None:
                 plies.append(
                     Ply(
                         IsotropicMaterial(
-                            get_SI_value(layer.E_t_xx), get_SI_value(layer.nu_xy), 1.0
+                            get_SI_value(layer_properties.get("E_t_xx")),
+                            get_SI_value(layer_properties.get("nu_xy")),
+                            1.0,
                         ),
-                        get_SI_value(layer.thickness),
+                        get_SI_value(layer_properties.get("thickness")),
                     )
                 )
             else:
                 plies.append(
                     Ply(
                         TransverselyIsotropicMaterial(
-                            get_SI_value(layer.E_t_xx),
-                            get_SI_value(layer.E_t_yy),
-                            get_SI_value(layer.nu_xy),
-                            get_SI_value(layer.G_xy),
+                            get_SI_value(layer_properties.get("E_t_xx")),
+                            get_SI_value(layer_properties.get("E_t_yy")),
+                            get_SI_value(layer_properties.get("nu_xy")),
+                            get_SI_value(layer_properties.get("G_xy")),
                             1.0,
                         ),
-                        get_SI_value(layer.thickness),
+                        get_SI_value(layer_properties.get("thickness")),
                     )
                 )
         stackup = Stackup(plies=plies, bot_to_top=True)

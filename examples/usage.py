@@ -1,9 +1,9 @@
-from examples.secret_data.my_secret_path import mypath  # str of directory
+from examples.secret_data.my_secret_path import mypath, username, password
 
 from quintus.io.excel import ExcelReader
 from quintus.io.mongo import MongoDataWriter, MongoDataSet  # noqa
 
-from quintus.evals.composites.battery.component import ElectrodeCapacityCalc
+from quintus.evals.component import ElectrodeCapacityCalc
 
 from quintus.evals.composites.battery import (
     CapacityEvaluation,  # noqa
@@ -14,7 +14,7 @@ from quintus.evals.composites.battery import (
 from quintus.walkers import DataFiller
 from quintus.walkers.optimization import BruteForceOptimizer
 
-writer = MongoDataWriter()
+writer = MongoDataWriter(username=username, password=password)
 
 ExcelReader(
     mypath + "quintus_data_v1.0.0.xlsx", mypath + "config_v1.0.0.json", writer
@@ -28,8 +28,10 @@ def data_extension():
     # Componentwise Dateset-Extension
     evaluations = set()
     evaluations.add(ElectrodeCapacityCalc())
-    dataset = MongoDataSet()
-    result_writer = MongoDataWriter(override=False)  # same set!
+    dataset = MongoDataSet(username=username, password=password)
+    result_writer = MongoDataWriter(
+        override=False, username=username, password=password
+    )  # same set!
     optimizer = DataFiller(dataset, evaluations, result_writer)
     optimizer.walk()
 
@@ -44,8 +46,10 @@ def stage1_evaluation():
     evaluations.add(StiffnessEvaluation())
     evaluations.add(EnergyDensity())
 
-    dataset = MongoDataSet()
-    result_writer = MongoDataWriter(document="results1")
+    dataset = MongoDataSet(username=username, password=password)
+    result_writer = MongoDataWriter(
+        document="results1", username=username, password=password
+    )
 
     optimizer = BruteForceOptimizer(dataset, evaluations, result_writer)
     optimizer.walk()

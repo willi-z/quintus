@@ -18,6 +18,8 @@ class MongoDataSet(DataSet):
         self.port = port
         self.database_name = database
         self.document_name = document
+        self.username = username
+        self.password = password
 
         self.client = pymongo.MongoClient(
             host, port, username=username, password=password
@@ -44,11 +46,13 @@ class MongoDataSet(DataSet):
             final_filter = self.filter
 
         return MongoDataSet(
-            self.host_name,
-            self.port,
-            self.database_name,
-            self.document_name,
-            final_filter,
+            host=self.host_name,
+            port=self.port,
+            database=self.database_name,
+            document=self.document_name,
+            username=self.username,
+            password=self.password,
+            init_filter=final_filter,
         )
 
     def find(self, query: dict | None = None) -> Iterator[dict]:

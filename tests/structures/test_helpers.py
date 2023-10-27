@@ -1,13 +1,13 @@
 import pytest
 from pydantic import BaseModel
 from quintus.structures import Component, Measurement
-from quintus.structures.helpers import component_to_filter
+from quintus.structures.helpers import component_to_dict, component_to_filter
 
 
 class Measurments(BaseModel):
-    potential_vs_Li = Measurement()
-    thickness = Measurement()
-    density = Measurement()
+    potential_vs_Li: Measurement = Measurement()
+    thickness: Measurement = Measurement()
+    density: Measurement = Measurement()
 
 
 class OnlyProperties(Component):
@@ -15,8 +15,8 @@ class OnlyProperties(Component):
 
 
 class Components(BaseModel):
-    a = Component()
-    b = Component()
+    a: Component = Component()
+    b: Component = Component(properties=Measurments().model_dump())
 
 
 class OnlyComposite(Component):
@@ -25,6 +25,12 @@ class OnlyComposite(Component):
 
 class OnlyComposite2(Component):
     composition: dict[str, Component] = {"a": Component(), "b": Component()}
+
+
+@pytest.mark.parametrize("comp, result", [(OnlyComposite2(), {})])
+def test_component_to_dict(comp: Component, result: dict):
+    result["_id"] = comp.identifier
+    assert component_to_dict(comp) == result
 
 
 @pytest.mark.parametrize(

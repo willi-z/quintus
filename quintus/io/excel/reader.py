@@ -1,6 +1,5 @@
 # from ..__base__.datawriter import DataWriter
 from quintus.structures import Component, ValidationError, Measurement
-from quintus.helpers.id_generation import generate_id
 from quintus.helpers.parser import parse_value
 
 from .configuration import ExcelConfiguration, update_config, ExcelSheetConfiguration
@@ -56,10 +55,10 @@ class ExcelReader:
             if sheet_name not in self.config.sheets:
                 continue
 
-            master_config = self.config.dict()
+            master_config = self.config.model_dump()
             master_config.pop("ignore")
             master_config.pop("sheets")
-            sheet_config = self.config.sheets.get(sheet_name).dict()
+            sheet_config = self.config.sheets.get(sheet_name).model_dump()
             self.read_sheet(sheet_name, update_config(master_config, sheet_config))
 
     def read_prefixes(
@@ -102,7 +101,7 @@ class ExcelReader:
 
         start_row = config.pointers.start
         for row in sheet.iter_rows(start_row):
-            component = Component(_id=generate_id())
+            component = Component()
 
             if component.tags is None:
                 component.tags = set()
@@ -131,7 +130,7 @@ class ExcelReader:
                         if component.composition is None:
                             component.composition = dict()
                         if cell_prefix not in component.composition.keys():
-                            entry = Component(_id=generate_id())
+                            entry = Component()
                             component.composition[cell_prefix] = entry
                         else:
                             entry = component.composition[cell_prefix]
@@ -167,7 +166,9 @@ class ExcelReader:
                     if entry.properties is None:
                         entry.properties = dict()
                     try:
-                        entry.properties[cell_name] = Measurement(**value)
+                        entry.properties[
+                            cell_name.replace("  ", " ").replace(" ", "_")
+                        ] = Measurement(**value)
                     except ValidationError:
                         warnings.warn(
                             f"Measurment {cell_name} from {entry.name} is not valid."

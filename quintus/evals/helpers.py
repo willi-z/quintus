@@ -7,12 +7,15 @@ def generate_filters(evaluations: list[Evaluation]) -> dict[str, dict]:
     for evaluation in evaluations:
         eval_filter = evaluation.filter_per_args()
         for key, filter in eval_filter.items():
-            if filters.get(key) is None:
-                filters[key] = {"$and": []}  # {"usage": {"$in": [key]}}
+            if filter is None:
+                continue
+            filter_list = []
+            if filters.get(key) is not None:
+                filter_list = cast(list, filters[key]["$and"])
 
-            filter_list = cast(list, filters[key]["$and"])
-            filter_list.append(filter)
+            filter_list = filter_list + filter["$and"]
 
+            filters[key] = {"$and": filter_list}  # {"usage": {"$in": [key]}}
     return filters
 
 

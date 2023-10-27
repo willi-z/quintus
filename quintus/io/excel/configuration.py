@@ -5,15 +5,15 @@ from .flag import Flag
 
 class ExcelSheetConfiguration(BaseModel):
     flag: Flag
-    pointers: Pointers = None
-    transforms: dict[str, str] = None
+    pointers: Pointers | None = None
+    transforms: dict[str, str] | None = None
 
 
 class ExcelConfiguration(BaseModel):
-    ignore: list[str] = None
-    sheets: dict[str, ExcelSheetConfiguration] = None
-    pointers: Pointers = None
-    transforms: dict[str, str] = None
+    ignore: list[str] | None = None
+    sheets: dict[str, ExcelSheetConfiguration] | None = None
+    pointers: Pointers | None = None
+    transforms: dict[str, str] | None = None
 
     # def __init__(self, **data):
     #     super().__init__(**data)

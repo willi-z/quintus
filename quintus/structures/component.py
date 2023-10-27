@@ -1,15 +1,30 @@
+from quintus.helpers.id_generation import generate_id
 from .measurement import Measurement
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 import warnings
 
 
-class Component(BaseModel, extra=Extra.allow):
-    _id: str
+def alias_generator(field_name: str) -> str:
+    if field_name == "identifier":
+        return "_id"
+    return field_name
+
+
+class Component(BaseModel):
+    model_config = ConfigDict(extra="allow", alias_generator=alias_generator)
+    identifier: str = Field(default_factory=generate_id)
     name: str = None
-    description: str = None
-    tags: set[str] = None
-    properties: dict[str, Measurement] = None
-    composition: dict[str, "Component"] = None
+    description: str | None = None
+    tags: set[str] | None = None
+    properties: dict[str, Measurement] | None = None
+    composition: dict[str, "Component"] | None = None
+
+    @field_serializer("tags")
+    def serialize_tags(self, tags: set[str], _info):
+        if tags is not None:
+            return list(self.tags)
+        else:
+            return None
 
     def is_valid(self) -> bool:
         if self.name is None:
@@ -34,8 +49,8 @@ class Component(BaseModel, extra=Extra.allow):
                 if not measu.is_empty():
                     return False
 
-        if self.compostion is not None:
-            for comp in self.compostion.values():
+        if self.composition is not None:
+            for comp in self.composition.values():
                 if not comp.is_empty():
                     return False
         return True

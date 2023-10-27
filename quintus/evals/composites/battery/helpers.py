@@ -31,7 +31,7 @@ def calc_spec_energy_density(spec_capacity: float, V_0: float) -> float:
 
 
 def get_active_layer(material: Component) -> Component | None:
-    if (comp := material.compostion) is not None:
+    if (comp := material.composition) is not None:
         if (layer := comp.get("active layer")) is not None:
             return layer
     return None

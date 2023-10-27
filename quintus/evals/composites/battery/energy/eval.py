@@ -1,6 +1,8 @@
+from typing import cast
 from quintus.evals.composites.battery.evaluation import BatteryEvaluation
 from quintus.evals.composites.battery.helpers import get_active_layer
-from quintus.structures import get_SI_value, Measurement
+from quintus.structures import get_SI_value
+from quintus.structures.component import Component
 from .model import WeightComponent, ElectrodeComponent
 
 
@@ -23,25 +25,27 @@ class EnergyDensity(BatteryEvaluation):
         separator: WeightComponent,
     ) -> float:
         active_layer = get_active_layer(anode)
-        areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
-        # layers = Measurement(**active_layer.__dict__.get("layers"))
-        anode_capacity = get_SI_value(areal_capacity)  # [As/m^2}
-        # anode_layers = get_SI_value(layers)  # []
-        anode_voltage = get_SI_value(anode.potential_vs_Li)  # [V]
+        active_layer_properties = active_layer.properties
+        anode_capacity = get_SI_value(
+            active_layer_properties.get("areal_capacity")
+        )  # [As/m^2}
+        anode_voltage = get_SI_value(anode.properties.get("potential_vs_Li"))  # [V]
 
         active_layer = get_active_layer(cathode)
-        areal_capacity = Measurement(**active_layer.__dict__.get("areal_capacity"))
-        # layers = Measurement(**active_layer.__dict__.get("layers"))
-        cathode_capacity = get_SI_value(areal_capacity)  # [As/m^2}
-        # cathode_layers = get_SI_value(layers)  # []
-        cathode_voltage = get_SI_value(cathode.potential_vs_Li)  # [V]
-
+        active_layer_properties = active_layer.properties
+        cathode_capacity = get_SI_value(
+            active_layer_properties.get("areal_capacity")
+        )  # [As/m^2}
+        cathode_voltage = get_SI_value(cathode.properties.get("potential_vs_Li"))  # [V]
         dV = cathode_voltage - anode_voltage
 
         m_sum = 0
         layup = [foil, anode, separator, cathode, foil]
         for layer in layup:
-            m_sum += get_SI_value(layer.thickness) * get_SI_value(layer.density)
+            layer_properties = cast(Component, layer).properties
+            m_sum += get_SI_value(layer_properties.get("thickness")) * get_SI_value(
+                layer_properties.get("density")
+            )
 
         return (
             min(anode_capacity, cathode_capacity)  #  * anode_layers  # * cathode_layers

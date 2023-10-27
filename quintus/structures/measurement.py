@@ -1,19 +1,21 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 import re
 
 
 class Measurement(BaseModel):
     value: float = None
-    unit: str = "1"
+    unit: str = None
     tol: tuple[float] | list[float] = None
     source: str = None
     at: dict[str, "Measurement"] = None
 
-    @validator("unit")
+    @field_validator("unit")
     def valid_unit(cls, val):
+        if val is None:
+            return "1"
         return val
 
-    @validator("tol")
+    @field_validator("tol")
     def valid_tolerance(cls, val):
         if val is None:
             return val
@@ -25,7 +27,7 @@ class Measurement(BaseModel):
             raise ValueError("Tolerance should be (minumum, maximum)!")
         return val
 
-    @validator("source")
+    @field_validator("source")
     def valid_source(cls, val: str):
         if val is None:
             return val
