@@ -10,7 +10,7 @@ def test_reader():
 
         def write_entry(self, entry: Component) -> None:
             key = entry.name
-            self.data[key] = entry.dict()
+            self.data[key] = entry.model_dump()
 
     writer = TestWriter()
     reader = ExcelReader(

@@ -1,4 +1,5 @@
 # from ..__base__.datawriter import DataWriter
+from quintus.helpers.id_generation import generate_id
 from quintus.structures import Component, ValidationError, Measurement
 from quintus.helpers.parser import parse_value
 
@@ -101,7 +102,7 @@ class ExcelReader:
 
         start_row = config.pointers.start
         for row in sheet.iter_rows(start_row):
-            component = Component()
+            component = Component(identifier=generate_id())
 
             if component.tags is None:
                 component.tags = set()
@@ -130,7 +131,7 @@ class ExcelReader:
                         if component.composition is None:
                             component.composition = dict()
                         if cell_prefix not in component.composition.keys():
-                            entry = Component()
+                            entry = Component(identifier=generate_id())
                             component.composition[cell_prefix] = entry
                         else:
                             entry = component.composition[cell_prefix]

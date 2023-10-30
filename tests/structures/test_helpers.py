@@ -16,7 +16,7 @@ class OnlyProperties(Component):
 
 class Components(BaseModel):
     a: Component = Component()
-    b: Component = Component(properties=Measurments().model_dump())
+    b: Component = OnlyProperties()
 
 
 class OnlyComposite(Component):
@@ -27,9 +27,10 @@ class OnlyComposite2(Component):
     composition: dict[str, Component] = {"a": Component(), "b": Component()}
 
 
-@pytest.mark.parametrize("comp, result", [(OnlyComposite2(), {})])
+@pytest.mark.parametrize(
+    "comp, result", [(OnlyComposite2(), {"composition": {"a": {}, "b": {}}})]
+)
 def test_component_to_dict(comp: Component, result: dict):
-    result["_id"] = comp.identifier
     assert component_to_dict(comp) == result
 
 

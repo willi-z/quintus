@@ -1,6 +1,5 @@
-from quintus.helpers.id_generation import generate_id
 from .measurement import Measurement
-from pydantic import BaseModel, Field, ConfigDict, field_serializer
+from pydantic import BaseModel, ConfigDict, field_serializer
 import warnings
 
 
@@ -12,8 +11,8 @@ def alias_generator(field_name: str) -> str:
 
 class Component(BaseModel):
     model_config = ConfigDict(extra="allow", alias_generator=alias_generator)
-    identifier: str = Field(default_factory=generate_id)
-    name: str = None
+    identifier: str | None = None  # Field(default_factory=generate_id)
+    name: str | None = None
     description: str | None = None
     tags: set[str] | None = None
     properties: dict[str, Measurement] | None = None

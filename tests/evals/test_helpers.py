@@ -6,12 +6,18 @@ from .helpers import EvaluationTestAttrs
 @pytest.mark.parametrize(
     ("attrs", "result"),
     [
-        ([{"empty": {}}], {"empty": [{}]}),
-        ([{"collect": {"0"}}, {"collect": {"1"}}], {"collect": [{"0"}, {"1"}]}),
-        ([{"summerize": {"0"}}, {"summerize": {"0"}}], {"summerize": [{"0"}, {"0"}]}),
+        ([{"empty": {"$and": [{}]}}], {"empty": {"$and": [{}]}}),
         (
-            [{"different0": {"0"}}, {"different1": {"0"}}],
-            {"different0": [{"0"}], "different1": [{"0"}]},
+            [{"collect": {"$and": [{"0"}]}}, {"collect": {"$and": [{"1"}]}}],
+            {"collect": {"$and": [{"0"}, {"1"}]}},
+        ),
+        (
+            [{"summerize": {"$and": [{"0"}]}}, {"summerize": {"$and": [{"0"}]}}],
+            {"summerize": {"$and": [{"0"}, {"0"}]}},
+        ),
+        (
+            [{"different0": {"$and": [{"0"}]}}, {"different1": {"$and": [{"0"}]}}],
+            {"different0": {"$and": [{"0"}]}, "different1": {"$and": [{"0"}]}},
         ),
     ],
 )
@@ -20,8 +26,4 @@ def test_generate_filters(attrs: dict[str, dict], result: dict[str, list]):
     for attr in attrs:
         evaluations.append(EvaluationTestAttrs(attr))
     sol = generate_filters(evaluations)
-    assert len(sol.keys()) == len(result.keys())
-    for key in result.keys():
-        assert key in sol.keys()
-        res = sol[key]["$and"]
-        assert res == result[key]
+    assert sol == result
