@@ -40,29 +40,23 @@ def test_component_to_dict(comp: Component, result: dict):
         (
             OnlyProperties(),
             {
-                "$and": [
-                    {"properties.potential_vs_Li": {"$exists": True}},
-                    {"properties.thickness": {"$exists": True}},
-                    {"properties.density": {"$exists": True}},
-                ]
+                "properties.potential_vs_Li": {"$exists": True},
+                "properties.thickness": {"$exists": True},
+                "properties.density": {"$exists": True},
             },
         ),
         (
             OnlyComposite(),
             {
-                "$and": [
-                    {"composition.a": {"$exists": True}},
-                    {"composition.b": {"$exists": True}},
-                ]
+                "composition.a": {"$exists": True},
+                "composition.b": {"$exists": True},
             },
         ),
         (
             OnlyComposite2(),
             {
-                "$and": [
-                    {"composition.a": {"$exists": True}},
-                    {"composition.b": {"$exists": True}},
-                ]
+                "composition.a": {"$exists": True},
+                "composition.b": {"$exists": True},
             },
         ),
     ],

@@ -8,7 +8,9 @@ class ElectrodeComponent(Component):
         "density": Measurement(),
     }
     composition: dict[str, Component] = {
-        "active layer": Component(properties={"areal_capacity": Measurement()})
+        "active layer": Component(
+            properties={"areal_capacity": Measurement(), "layers": Measurement()}
+        )
     }
 
 

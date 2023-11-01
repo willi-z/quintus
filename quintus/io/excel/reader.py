@@ -6,11 +6,12 @@ from quintus.helpers.parser import parse_value
 from .configuration import ExcelConfiguration, update_config, ExcelSheetConfiguration
 from .legend import ExcelValueLegend
 
-from openpyxl import load_workbook
+from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import json
 from pathlib import Path
 import warnings
+import io
 
 
 class ExcelReader:
@@ -31,8 +32,7 @@ class ExcelReader:
             _description_
 
         """
-        self.wb = load_workbook(filename=filename, data_only=True, read_only=True)
-
+        self.filename = filename
         with Path(config_file).open() as fp:
             config = json.load(fp)
 
@@ -47,7 +47,10 @@ class ExcelReader:
         return self.config
 
     def read_all(self):
-        sheets_names = self.wb.sheetnames
+        with open(self.filename, "rb") as f:
+            in_mem_file = io.BytesIO(f.read())
+        wb = load_workbook(filename=in_mem_file, data_only=True, read_only=True)
+        sheets_names = wb.sheetnames
         for sheet_name in sheets_names:
             if self.config.ignore is not None:
                 if sheet_name in self.config.ignore:
@@ -60,7 +63,8 @@ class ExcelReader:
             master_config.pop("ignore")
             master_config.pop("sheets")
             sheet_config = self.config.sheets.get(sheet_name).model_dump()
-            self.read_sheet(sheet_name, update_config(master_config, sheet_config))
+            self.read_sheet(wb, sheet_name, update_config(master_config, sheet_config))
+        wb.close()
 
     def read_prefixes(
         self, sheet: Worksheet, config: ExcelSheetConfiguration
@@ -92,8 +96,8 @@ class ExcelReader:
                 units.append(cell.value)
         return units
 
-    def read_sheet(self, name: str, config: dict):
-        sheet = self.wb[name]
+    def read_sheet(self, wb: Workbook, name: str, config: dict):
+        sheet = wb[name]
         config = ExcelSheetConfiguration(**config)
         legend = ExcelValueLegend(sheet)
         prefix = self.read_prefixes(sheet, config)

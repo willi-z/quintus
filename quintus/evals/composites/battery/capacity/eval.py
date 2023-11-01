@@ -1,8 +1,13 @@
+from typing import cast
 from quintus.evals.composites.battery.evaluation import BatteryEvaluation
+from quintus.evals.composites.battery.helpers import (
+    generate_layup,
+    generate_layup_ids,
+    get_active_layer,
+)
+from quintus.structures.measurement import Measurement
 from .model import ElectrodeComponent
-from ..constants import NUM_ELECTRODE_LAYERS, OUTER_ELECTRODE_LAYER
 from quintus.structures import get_SI_value
-import numpy as np
 
 
 class CapacityEvaluation(BatteryEvaluation):
@@ -19,14 +24,50 @@ class CapacityEvaluation(BatteryEvaluation):
         anode: ElectrodeComponent,
         cathode: ElectrodeComponent,
     ) -> float:
-        anode_capacity = get_SI_value(anode.areal_capacity)
-        cathode_capacity = get_SI_value(cathode.areal_capacity)
-        if OUTER_ELECTRODE_LAYER == "anode":
-            anode_capacity = anode_capacity * np.ceil(NUM_ELECTRODE_LAYERS / 2)
-            cathode_capacity = cathode_capacity * np.floor(NUM_ELECTRODE_LAYERS / 2)
-        else:
-            anode_capacity = anode_capacity * np.floor(NUM_ELECTRODE_LAYERS / 2)
-            cathode_capacity = cathode_capacity * np.ceil(NUM_ELECTRODE_LAYERS / 2)
+        active_layer = get_active_layer(anode)
+        active_layer_properties = active_layer.properties
+        anode_capacity = get_SI_value(active_layer_properties.get("areal_capacity"))
+        active_layer = get_active_layer(cathode)
+        active_layer_properties = active_layer.properties
+        cathode_capacity = get_SI_value(
+            active_layer_properties.get("areal_capacity")
+        )  # [As/m^2}
+        eff_capacity = min(anode_capacity, cathode_capacity)
+        capacity = 0
+        layup = generate_layup(anode, cathode, None, None)
+        keys = generate_layup_ids()
+        usages = list()
+        for i in range(len(layup)):
+            usages.append(0)
 
-        # TODO account for two active layer
-        return min(anode_capacity, cathode_capacity)
+            index_current = i
+            id_current = keys[index_current]
+
+            if id_current not in ["anode", "cathode"]:
+                continue
+            if (index_other := i - 2) < 0:
+                continue
+            id_other = keys[index_other]
+            if id_other not in ["anode", "cathode"] or id_other == id_current:
+                continue
+
+            current = layup[index_current]
+            other = layup[index_other]
+
+            active_layer = get_active_layer(current)
+            current_active_layers = cast(
+                Measurement, active_layer_properties.get("layers")
+            ).value
+            active_layer = get_active_layer(other)
+            other_active_layers = cast(
+                Measurement, active_layer_properties.get("layers")
+            ).value
+
+            if (
+                usages[index_current] < current_active_layers
+                and usages[index_other] < other_active_layers
+            ):
+                capacity = capacity + eff_capacity
+                usages[index_current] = usages[index_current] + 1
+                usages[index_other] = usages[index_other] + 1
+        return capacity

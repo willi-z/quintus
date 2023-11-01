@@ -3,14 +3,8 @@ from pydantic import BaseModel, ConfigDict, field_serializer
 import warnings
 
 
-def alias_generator(field_name: str) -> str:
-    if field_name == "identifier":
-        return "_id"
-    return field_name
-
-
 class Component(BaseModel):
-    model_config = ConfigDict(extra="allow", alias_generator=alias_generator)
+    model_config = ConfigDict(extra="allow")
     identifier: str | None = None  # Field(default_factory=generate_id)
     name: str | None = None
     description: str | None = None

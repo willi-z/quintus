@@ -20,22 +20,25 @@ class BatteryEvaluation(BasicEvaluation):
         cathode: Component = None,
         foil: Component = None,
         separator: Component = None,
+        inlude_only_taged: bool = True,
     ):
         self.anode_cls = anode
         self.cathode_cls = cathode
         self.foil_cls = foil
         self.separator_cls = separator
 
-        super().__init__(
-            name,
-            unit,
-            {
-                "anode": component_to_filter(self.anode_cls),
-                "cathode": component_to_filter(self.cathode_cls),
-                "foil": component_to_filter(self.foil_cls),
-                "separator": component_to_filter(self.separator_cls),
-            },
-        )
+        filters = {
+            "anode": component_to_filter(self.anode_cls),
+            "cathode": component_to_filter(self.cathode_cls),
+            "foil": component_to_filter(self.foil_cls),
+            "separator": component_to_filter(self.separator_cls),
+        }
+
+        if inlude_only_taged:
+            for key, item in filters.items():
+                item["tags"] = key
+
+        super().__init__(name, unit, filters)
 
     @abstractmethod
     def compute_battery(

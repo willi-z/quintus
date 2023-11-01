@@ -2,4 +2,8 @@ from quintus.structures import Component, Measurement
 
 
 class ElectrodeComponent(Component):
-    properties: dict[str, Measurement] = {"areal_capacity": Measurement()}
+    composition: dict[str, Component] = {
+        "active layer": Component(
+            properties={"areal_capacity": Measurement(), "layers": Measurement()}
+        )
+    }

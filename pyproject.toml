@@ -34,7 +34,6 @@ test = [
 [project.optional-dependencies]
 visual=[
     "flask>=2.2.3",
-    "plotly>=5.13.1",
-    "matplotlib>=3.7.1",
+    "plotly>=5.18.0",
 ]
 all = ["quintus[visual,test]"]

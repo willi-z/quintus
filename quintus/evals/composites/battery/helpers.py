@@ -1,4 +1,4 @@
-from .constants import CONST_F
+from .constants import CONST_F, NUM_ELECTRODE_LAYERS, OUTER_ELECTRODE_LAYER
 from quintus.structures import Component
 
 
@@ -35,3 +35,39 @@ def get_active_layer(material: Component) -> Component | None:
         if (layer := comp.get("active layer")) is not None:
             return layer
     return None
+
+
+def generate_layup_ids() -> list[str]:
+    layup = ["foil"]
+    for i in range(NUM_ELECTRODE_LAYERS):
+        if OUTER_ELECTRODE_LAYER == "cathode":
+            if i % 2 == 0:
+                layup.append("cathode")
+            else:
+                layup.append("anode")
+        else:
+            if i % 2 == 0:
+                layup.append("anode")
+            else:
+                layup.append("cathode")
+        if i + 1 < NUM_ELECTRODE_LAYERS:
+            layup.append("separator")
+    layup.append("foil")
+    return layup
+
+
+def generate_layup(anode, cathode, foil, separator) -> list[Component]:
+    ids = generate_layup_ids()
+    layup = []
+    for id in ids:
+        if id == "anode":
+            layup.append(anode)
+        elif id == "cathode":
+            layup.append(cathode)
+        elif id == "foil":
+            layup.append(foil)
+        elif id == "separator":
+            layup.append(separator)
+        else:
+            raise ValueError(f"Unknown layer id: {id}.")
+    return layup

@@ -1,3 +1,4 @@
+import warnings
 from pydantic import BaseModel, field_validator
 import re
 
@@ -42,7 +43,8 @@ class Measurement(BaseModel):
             p = re.compile(regex)
             if len(p.findall(val)) > 0:
                 return val
-        raise ValueError("Source did not match!")
+        warnings.warn(f"Source: '{val}' did not match known pattern!")
+        return val
 
     def is_empty(self) -> bool:
         if self.value is None:

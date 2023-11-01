@@ -1,5 +1,4 @@
 from .evaluation import Evaluation
-from typing import cast
 
 
 def generate_filters(evaluations: list[Evaluation]) -> dict[str, dict]:
@@ -9,13 +8,9 @@ def generate_filters(evaluations: list[Evaluation]) -> dict[str, dict]:
         for key, filter in eval_filter.items():
             if filter is None:
                 continue
-            filter_list = []
-            if filters.get(key) is not None:
-                filter_list = cast(list, filters[key]["$and"])
-
-            filter_list = filter_list + filter["$and"]
-
-            filters[key] = {"$and": filter_list}  # {"usage": {"$in": [key]}}
+            if filters.get(key) is None:
+                filters[key] = dict()
+            filters[key].update(filter)
     return filters
 
 

@@ -1,3 +1,5 @@
+from quintus.helpers.id_generation import generate_id
+from quintus.structures.component import Component
 from .optimizer import Optimizer
 import warnings
 
@@ -67,10 +69,11 @@ class BruteForceOptimizer(Optimizer):
         print(end="")
         for i in range(total_combinations):
             config = get_config(i)
-            entry = dict()
-            entry = {"config": config}
+            entry = Component(identifier=generate_id())
+            entry.composition = config
+            entry.properties = dict()
             for evaluation in self.evaluations:
-                entry.update(evaluation.evaluate(**config))
+                entry.properties.update(evaluation.evaluate(**config))
 
             self.writer.write_entry(entry)
             print(

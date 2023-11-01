@@ -19,6 +19,8 @@ units = {
     "GPa": 1e9,
     "°C": "change system",
     "C": 1,
+    "Wh": 60 * 60,
+    "N": 1,
 }
 
 operators = {"^": "**"}
@@ -40,6 +42,8 @@ def parse_unit(unit: str) -> float:
 
     creates an numerical expression, wich can be evaluted in the end with eval
     """
+    if unit is None:
+        return 1
 
     for key in units:
         # check each unit in list
