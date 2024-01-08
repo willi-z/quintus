@@ -29,4 +29,4 @@ class MongoDataWriter(DataWriter):
         if override is True:
             self.document.insert_one(content)
         else:
-            self.document.update_one({"_id": entry._id}, content, upsert=True)
+            self.document.update_one({"_id": content.get("_id")}, content, upsert=True)

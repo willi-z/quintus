@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Material Page</title>
+        <link rel="stylesheet" type="text/css" href="editor.css">
+    </head>
+    <body>
+        <form class="form_container" action="/material/" enctype="multipart/form-data" method="POST">
+            <fieldset>
+            <div class="item_container_small">
+                <label class="item_small">name</label> 
+                <input class="item_small" type="text" name="name" placeholder="name"></input>
+            </div>
+            
+            <div class="item_container_small">
+                <label class="item_small">usage</label> 
+                <input class="item_small" type="text" name="usage" placeholder="tags"></input>
+            </div>
+
+            <div class="item_container_large">
+                <label class="item_small">description</label> 
+                <textarea class="item_large" rows="4" cols="50" name="description" placeholder="A long and detailed description."></textarea>
+            </div>
+            </fieldset>
+
+            <fieldset>
+                <div class="item_container_large">
+                    <label class="item_small">layers</label> 
+                    <button class="item_small" type="button">+</button>
+                    <table class="item_large">
+                        <tr>
+                            <th>name</td>
+                            <th>thickness</td>
+                            <th>orientation</td>
+                            <th></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input class="item_small" type="text" name="layers[1][name]" placeholder="name"></input>
+                            </td>
+                            <td>
+                                <input class="item_small" type="text" name="layers[1][thickness]" placeholder="thickness"></input>
+                            </td>
+                            <td>
+                                <input class="item_small" type="text" name="layers[1][orientation]" placeholder="orientation"></input>
+                            </td>
+                            <td><button class="item_small" type="button">-</button> </td>
+                        </tr>
+                    </table>
+                    <button class="item_small" type="button">+</button>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <div class="item_container_large">
+                    <p class="item_small">properties</p> 
+                    <table class="item_large">
+                        <tr>
+                            <th>name</td>
+                            <th>value</td>
+                            <th>source</td>
+                            <th></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input class="item_small" type="text" name="values[1][name]" placeholder="name"></input>
+                            </td>
+                            <td>
+                                <input class="item_small" type="text" name="values[1][value]" placeholder="value"></input>
+                            </td>
+                            <td>
+                                <input class="item_small" type="text" name="values[1][source]" placeholder="source"></input>
+                            </td>
+                            <td><button class="item_small" type="button">-</button> </td>
+                        </tr>
+                    </table>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="item_container_small">
+                    <input class="item_small" type="submit" value="Save"></input>
+                    <input class="item_small" type="button" value="Cancel"></input> 
+                </div>
+            </fieldset>
+        </form>
+    </body>
+</html>

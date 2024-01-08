@@ -20,8 +20,8 @@ class Component(BaseModel):
             return None
 
     def is_valid(self) -> bool:
-        if self.name is None:
-            return False
+        # if self.name is None:
+        #    return False
         if self.composition is not None:
             for component in self.composition.values():
                 if not component.is_valid():
@@ -71,12 +71,15 @@ class Component(BaseModel):
 
         if self.name is None:
             if parent is not None:
+                pass
+                """
                 warnings.warn(
                     f"Composite name with path '{composite}' "
                     + f"from component {parent.name} "
                     + "is not known!",
                     RuntimeWarning,
                 )
+                """
             else:
                 warnings.warn("Component name is not known!", RuntimeWarning)
             return

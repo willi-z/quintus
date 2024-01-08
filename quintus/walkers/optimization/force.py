@@ -75,6 +75,8 @@ class BruteForceOptimizer(Optimizer):
             for evaluation in self.evaluations:
                 entry.properties.update(evaluation.evaluate(**config))
 
+            for key in config.keys():
+                entry.composition[key] = Component(**entry.composition[key])
             self.writer.write_entry(entry)
             print(
                 "\r" + f"BruteForceOptimizer: ({i + 1} / {total_combinations})", end=""

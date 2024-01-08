@@ -27,10 +27,19 @@ def get_SI_tol(measurement: Measurement) -> tuple[float, float]:
 
 def component_to_dict(comp: Component) -> dict:
     # result = json.loads(comp.model_dump_json(exclude_unset=True, exclude_none=True))
-    result = comp.model_dump(
-        exclude_none=True,
-        by_alias=True,
-    )
+    # warnings.filterwarnings("error")
+    result = dict()
+    try:
+        result = comp.model_dump(
+            exclude_none=True,
+            by_alias=True,
+        )
+    except UserWarning as warn:
+        print(
+            warn.args[0]
+            + "for entry with id: "
+            + comp.identifier
+        )
     if (identifier := result.get("identifier")) is not None:
         result["_id"] = identifier
         del result["identifier"]

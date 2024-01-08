@@ -52,9 +52,7 @@ class EnergyDensity(BatteryEvaluation):
         for i in range(len(layup)):
             layer = layup[i]
             layer_properties = cast(Component, layer).properties
-            m_sum += get_SI_value(layer_properties.get("thickness")) * get_SI_value(
-                layer_properties.get("density")
-            )
+            m_sum += get_SI_value(layer_properties.get("areal_mass"))
             usages.append(0)
 
             index_current = i

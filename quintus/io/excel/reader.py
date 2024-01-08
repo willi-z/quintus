@@ -170,16 +170,24 @@ class ExcelReader:
 
                     if entry.properties is None:
                         entry.properties = dict()
-                    try:
-                        entry.properties[
-                            cell_name.replace("  ", " ").replace(" ", "_")
-                        ] = Measurement(**value)
-                    except ValidationError:
-                        warnings.warn(
+                    if isinstance(value["value"], str):
+                        print(
                             f"Measurment {cell_name} from {entry.name} is not valid."
                             + f" (found in cell '{cell.coordinate}' "
                             + f"in sheet: '{sheet.title}')"
                         )
+                    else:
+                        try:
+                            entry.properties[
+                                cell_name.replace("  ", " ").replace(" ", "_")
+                            ] = Measurement(**value)
+                        except ValidationError:
+                            warnings.warn(
+                                f"Measurment {cell_name} from {entry.name}" 
+                                + " is not valid."
+                                + f" (found in cell '{cell.coordinate}' "
+                                + f"in sheet: '{sheet.title}')"
+                            )
 
             warnings.filterwarnings("error")
             try:

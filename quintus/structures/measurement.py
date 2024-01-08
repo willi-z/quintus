@@ -43,7 +43,7 @@ class Measurement(BaseModel):
             p = re.compile(regex)
             if len(p.findall(val)) > 0:
                 return val
-        warnings.warn(f"Source: '{val}' did not match known pattern!")
+        print(f"Source: '{val}' did not match known pattern!")
         return val
 
     def is_empty(self) -> bool:

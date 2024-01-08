@@ -1,4 +1,4 @@
-from examples.secret_data.my_secret_path import mypath, username, password
+from my_secret_path import mypath, username, password
 from quintus.helpers.parser import parse_unit
 
 from quintus.io.excel import ExcelReader
@@ -10,6 +10,7 @@ from quintus.evals.composites.battery import (
     CapacityEvaluation,  # noqa
     StiffnessEvaluation,
     EnergyDensity,
+    ArealMass
 )
 from quintus.structures.component import Component
 from quintus.structures.measurement import Measurement
@@ -50,6 +51,7 @@ def stage1_evaluation():
     # evaluations.add(CapacityEvaluation())
     evaluations.add(StiffnessEvaluation())
     evaluations.add(EnergyDensity())
+    evaluations.add(ArealMass())
 
     dataset = MongoDataSet(username=username, password=password)
     result_writer = MongoDataWriter(
@@ -105,6 +107,7 @@ def plot_attr(
     extra_datas: list[Component] = None,
 ):
     import plotly.graph_objects as go
+    import numpy as np
 
     datas = dataset.find()
     xs = []
@@ -118,8 +121,11 @@ def plot_attr(
             for etype, elem in elements.items():
                 legend[etype] = elem["name"]
             legend_text = "/".join(legend.values())
-            if save_as_tex:
-                legend_text = legend_text
+            for property in ["areal_mass"]:
+                measurment = data["properties"]["areal_mass"]
+                val = np.round(measurment["value"], 3)
+                unit = measurment["unit"]
+                legend_text += "<br>"+f"{property}: {val} {unit}"
             return legend_text
 
         measurment = data["properties"][x_attr]
@@ -129,6 +135,7 @@ def plot_attr(
         y = measurment["value"] * parse_unit(measurment["unit"]) / parse_unit(y_unit)
         xs.append(x)
         ys.append(y)
+        
         legends.append(create_legend())
 
     fig = go.Figure()
@@ -161,8 +168,9 @@ def plot_attr(
         yaxis_title=ylabel,
         legend_title="Legend Title",
     )
-
-    fig.write_html(Path().cwd() / ("result_quintus" + ".html"))
+    outFile = Path().cwd() / ("result_quintus" + ".html")
+    fig.write_html(outFile)
+    print(f"Saved: {outFile}")
 
 
 literature_values = [
@@ -263,3 +271,4 @@ plot_attr(
     "GPa",
     extra_datas=literature_values,
 )
+print("Done")
