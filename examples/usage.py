@@ -1,4 +1,4 @@
-from my_secret_path import mypath, username, password
+from examples.secret_data.my_secret_path import mypath, username, password
 from quintus.helpers.parser import parse_unit
 
 from quintus.io.excel import ExcelReader
@@ -20,7 +20,12 @@ from quintus.walkers.optimization import BruteForceOptimizer
 
 from pathlib import Path
 
-writer = MongoDataWriter(username=username, password=password)
+username = None
+password = None
+
+writer = MongoDataWriter(
+    username=username, password=password
+)
 
 ExcelReader(
     mypath + "quintus_data_v1.0.0.xlsx", mypath + "config_v1.0.0.json", writer
