@@ -3,9 +3,7 @@ from secret_data.my_secret_path import mypath, username, password
 
 from pathlib import Path
 import sys
-
 import importlib.util
-
 spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"quintus/__init__.py"))
 quintus = importlib.util.module_from_spec(spec)
 sys.modules["quintus"] = quintus
@@ -29,98 +27,71 @@ from quintus.structures.measurement import Measurement
 
 from quintus.walkers import DataFiller
 from quintus.walkers.optimization import BruteForceOptimizer
-import numpy as np
 
 from pathlib import Path
+
+import matplotlib
+import matplotlib.pyplot as plt
+from cycler import cycler
+import numpy as np
 
 username = None
 password = None
 
-writer = MongoDataWriter(
-    username=username, password=password
-)
-
-ExcelReader(
-    mypath + "quintus_data_v1.0.0.xlsx", mypath + "config_v1.0.0.json", writer
-).read_all()
-
-
-save_as_tex = False
-
-
-def data_extension():
-    # Componentwise Dateset-Extension
-    evaluations = set()
-    evaluations.add(ElectrodeCapacityCalc())
-    dataset = MongoDataSet(username=username, password=password)
-    result_writer = MongoDataWriter(
-        override=False, username=username, password=password
-    )  # same set!
-    optimizer = DataFiller(dataset, evaluations, result_writer)
-    optimizer.walk()
-
-
-# data_extension()
-
-#exit()
-
-
-def stage1_evaluation():
-    # first simple evaluation
-    evaluations = set()
-    # evaluations.add(CapacityEvaluation())
-    evaluations.add(StiffnessEvaluation())
-    evaluations.add(EnergyDensity())
-    evaluations.add(ArealMass())
-
-    dataset = MongoDataSet(username=username, password=password)
-    result_writer = MongoDataWriter(
-        document="results1", username=username, password=password
-    )
-
-    optimizer = BruteForceOptimizer(dataset, evaluations, result_writer)
-    optimizer.walk()
-
-
-stage1_evaluation()
-
-
 light_plots = {
-    "figure.dpi": 300,
     "lines.color": "black",
     "patch.edgecolor": "black",
     "text.color": "black",
-    # "axes.prop_cycle": cycler(
-    #    "color", ["#fcbf49", "#f77f00", "#d62828", "#003049", "#0a9396"]
-    # ),
+    "axes.prop_cycle": cycler(
+       "color", ["#A0B1BA","#9656a2", "#9656a2", "#95cf92", "#f8e16f", "#f4895f", "#de324c"]
+    ),
     "axes.linewidth": 1.5,
     "axes.facecolor": "white",
-
     "axes.edgecolor": "black",
     "axes.labelcolor": "black",
     "xtick.color": "black",
     "ytick.color": "black",
     "figure.facecolor": "white",
-    "figure.edgecolor": "black",
-
+    "figure.edgecolor": "white",
     # grid
-    "axes.grid": False,
+    "axes.grid": True,
     "grid.color": "lightgray",
     "grid.linestyle": "dashed",
-
     # legend
     "legend.fancybox": False,
     "legend.edgecolor": "black",
-    "legend.facecolor": "white",
     "legend.labelcolor": "black",
-    "legend.framealpha": 0.8,
+    "legend.framealpha": 1.0,
     "savefig.facecolor": "white",
     "savefig.edgecolor": "black",
-    "savefig.transparent": True,
+    # "savefig.transparent": True,
 }
 
+colors = ["#6a7893","#9656a2", "#369acc", "#7cdd43", "#f8e16f", "#f4895f", "#de324c"]
 
 plot_config = light_plots
+
+el_benchmark = 245 # Wh/kg
+mech_benchmark = 30 # GPa
+
+def ray_tracing_method(x,y,poly):
+
+    n = len(poly)
+    inside = False
+
+    p1x,p1y = poly[0]
+    for i in range(n+1):
+        p2x,p2y = poly[i % n]
+        if y > min(p1y,p2y):
+            if y <= max(p1y,p2y):
+                if x <= max(p1x,p2x):
+                    if p1y != p2y:
+                        xints = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                    if p1x == p2x or x <= xints:
+                        inside = not inside
+        p1x,p1y = p2x,p2y
+
+    return inside
 
 
 def plot_attr(
@@ -134,7 +105,7 @@ def plot_attr(
     datas = dataset.find()
     xs = []
     ys = []
-    legends = []
+    #legends = []
     for data in datas:
         elements = data["composition"]
 
@@ -155,14 +126,40 @@ def plot_attr(
 
         measurment = data["properties"][y_attr]
         y = measurment["value"] * parse_unit(measurment["unit"]) / parse_unit(y_unit)
-        xs.append(x)
-        ys.append(y)
+        xs.append(x/2)
+        ys.append(y/8)
         
-        legends.append(create_legend())
+        #legends.append(create_legend())
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=xs, y=ys, name="Quintus", text=legends, marker_size=10))
+    fig, ax = plt.subplots(figsize=(4*1.5,3*1.5))
+    plt.rcParams.update(plot_config)
 
+    polygon_edges = np.array(
+        [
+            [float(el_benchmark), 0.0], 
+            [500.0, 0.0], 
+            [500.0, 32.0], 
+            [0.0, 32.0], 
+            [0.0, float(mech_benchmark)]
+        ],
+        dtype=np.float64
+    )
+    
+    inside_counter = 0
+    for i in range(len(xs)):
+        if ray_tracing_method(xs[i], ys[i], polygon_edges):
+            inside_counter = inside_counter + 1
+
+    print("No. of multifunctional points:", inside_counter)
+    polygon = matplotlib.patches.Polygon(polygon_edges, closed=True)
+    patch = matplotlib.collections.PatchCollection([polygon], alpha=0.4)
+    #colors = ["#01B04D"]
+    # patch.set_array(colors)
+    ax.add_collection(patch)
+
+    ax.scatter(xs, ys, label="Quintus", color= colors[0])
+
+    color_idx = 1
     if extra_datas is None:
         extra_datas = []
     for data in extra_datas:
@@ -171,27 +168,26 @@ def plot_attr(
 
         measurment = data.properties[y_attr]
         y = measurment.value * parse_unit(measurment.unit) / parse_unit(y_unit)
-        fig.add_trace(
-            go.Scatter(x=[x], y=[y], text=data.name, marker_size=10, name=data.name)
-        )
 
-    fig.update_traces(mode="markers", marker={"sizemode": "area", "sizeref": 10})
+        ax.scatter([x], [y], label=data.name, color=colors[color_idx])
+        color_idx = color_idx +1
 
     if x_unit is None:
         x_unit = data[x_attr]["unit"]
     xlabel = x_attr + " [" + x_unit + "]"
+    xlabel = "Energy density" + " [" + x_unit + "]"
     if y_unit is None:
         y_unit = data[y_attr]["unit"]
     ylabel = y_attr + " [" + y_unit + "]"
+    ylabel = "Stiffness" + " [" + y_unit + "]"
 
-    fig.update_layout(
-        title="Quintus Results",
-        xaxis_title=xlabel,
-        yaxis_title=ylabel,
-        legend_title="Legend Title",
-    )
-    outFile = Path().cwd() / ("result_quintus" + ".html")
-    fig.write_html(outFile)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    fig.tight_layout(pad=0.1)
+    ax.legend(loc="upper right")
+
+    outFile = Path().cwd() / ("result_quintus" + ".png")
+    plt.savefig(outFile)
     print(f"Saved: {outFile}")
 
 
@@ -271,7 +267,7 @@ L. Roberson, C. L. Pint, Energy Stor. Mater. 2020, 24,676
         },
     ),
     Component(
-        name="Pouch",
+        name="Comm. Pouchcell",
         description="Common Pouch Bag",
         properties={
             "energy_density": Measurement(
@@ -284,7 +280,7 @@ L. Roberson, C. L. Pint, Energy Stor. Mater. 2020, 24,676
     ),
 ]
 
-"""
+
 dataset = MongoDataSet(document="results1", username=username, password=password)
 plot_attr(
     dataset,
@@ -294,5 +290,4 @@ plot_attr(
     "GPa",
     extra_datas=literature_values,
 )
-"""
 print("Done")

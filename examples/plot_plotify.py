@@ -3,9 +3,7 @@ from secret_data.my_secret_path import mypath, username, password
 
 from pathlib import Path
 import sys
-
 import importlib.util
-
 spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"quintus/__init__.py"))
 quintus = importlib.util.module_from_spec(spec)
 sys.modules["quintus"] = quintus
@@ -29,98 +27,20 @@ from quintus.structures.measurement import Measurement
 
 from quintus.walkers import DataFiller
 from quintus.walkers.optimization import BruteForceOptimizer
-import numpy as np
 
 from pathlib import Path
+
+import plotly.graph_objects as go
+import numpy as np
 
 username = None
 password = None
 
-writer = MongoDataWriter(
-    username=username, password=password
-)
-
-ExcelReader(
-    mypath + "quintus_data_v1.0.0.xlsx", mypath + "config_v1.0.0.json", writer
-).read_all()
-
-
-save_as_tex = False
-
-
-def data_extension():
-    # Componentwise Dateset-Extension
-    evaluations = set()
-    evaluations.add(ElectrodeCapacityCalc())
-    dataset = MongoDataSet(username=username, password=password)
-    result_writer = MongoDataWriter(
-        override=False, username=username, password=password
-    )  # same set!
-    optimizer = DataFiller(dataset, evaluations, result_writer)
-    optimizer.walk()
-
-
-# data_extension()
-
-#exit()
-
-
-def stage1_evaluation():
-    # first simple evaluation
-    evaluations = set()
-    # evaluations.add(CapacityEvaluation())
-    evaluations.add(StiffnessEvaluation())
-    evaluations.add(EnergyDensity())
-    evaluations.add(ArealMass())
-
-    dataset = MongoDataSet(username=username, password=password)
-    result_writer = MongoDataWriter(
-        document="results1", username=username, password=password
-    )
-
-    optimizer = BruteForceOptimizer(dataset, evaluations, result_writer)
-    optimizer.walk()
-
-
-stage1_evaluation()
-
-
-light_plots = {
-    "figure.dpi": 300,
-    "lines.color": "black",
-    "patch.edgecolor": "black",
-    "text.color": "black",
-    # "axes.prop_cycle": cycler(
-    #    "color", ["#fcbf49", "#f77f00", "#d62828", "#003049", "#0a9396"]
-    # ),
-    "axes.linewidth": 1.5,
-    "axes.facecolor": "white",
-
-    "axes.edgecolor": "black",
-    "axes.labelcolor": "black",
-    "xtick.color": "black",
-    "ytick.color": "black",
-    "figure.facecolor": "white",
-    "figure.edgecolor": "black",
-
-    # grid
-    "axes.grid": False,
-    "grid.color": "lightgray",
-    "grid.linestyle": "dashed",
-
-    # legend
-    "legend.fancybox": False,
-    "legend.edgecolor": "black",
-    "legend.facecolor": "white",
-    "legend.labelcolor": "black",
-    "legend.framealpha": 0.8,
-    "savefig.facecolor": "white",
-    "savefig.edgecolor": "black",
-    "savefig.transparent": True,
-}
-
-
-plot_config = light_plots
+def is_special(data: dict) -> bool:
+    elements = data["composition"]
+    if "ElViS_p_6" in [element["name"] for element in elements.values()]:
+        return True
+    return False
 
 
 def plot_attr(
@@ -132,9 +52,16 @@ def plot_attr(
     extra_datas: list[Component] = None,
 ):
     datas = dataset.find()
-    xs = []
-    ys = []
-    legends = []
+    results = {
+        'x' : [],
+        'y' : [],
+        'text' : []
+    }
+    specials = {
+        'x' : [],
+        'y' : [],
+        'text' : []
+    }
     for data in datas:
         elements = data["composition"]
 
@@ -155,13 +82,18 @@ def plot_attr(
 
         measurment = data["properties"][y_attr]
         y = measurment["value"] * parse_unit(measurment["unit"]) / parse_unit(y_unit)
-        xs.append(x)
-        ys.append(y)
-        
-        legends.append(create_legend())
+        if is_special(data):
+            specials["x"].append(x/2)
+            specials["y"].append(y/8)
+            specials["text"].append(create_legend())
+        else:
+            results["x"].append(x/2)
+            results["y"].append(y/8)
+            results["text"].append(create_legend())
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=xs, y=ys, name="Quintus", text=legends, marker_size=10))
+    fig.add_trace(go.Scatter( name="Quintus", marker_size=10, **results))
+    fig.add_trace(go.Scatter( name="Quintus specials", marker_size=10, **specials))
 
     if extra_datas is None:
         extra_datas = []
@@ -193,7 +125,6 @@ def plot_attr(
     outFile = Path().cwd() / ("result_quintus" + ".html")
     fig.write_html(outFile)
     print(f"Saved: {outFile}")
-
 
 literature_values = [
     Component(
@@ -271,7 +202,7 @@ L. Roberson, C. L. Pint, Energy Stor. Mater. 2020, 24,676
         },
     ),
     Component(
-        name="Pouch",
+        name="Comm. Pouchcell",
         description="Common Pouch Bag",
         properties={
             "energy_density": Measurement(
@@ -284,7 +215,7 @@ L. Roberson, C. L. Pint, Energy Stor. Mater. 2020, 24,676
     ),
 ]
 
-"""
+
 dataset = MongoDataSet(document="results1", username=username, password=password)
 plot_attr(
     dataset,
@@ -294,5 +225,4 @@ plot_attr(
     "GPa",
     extra_datas=literature_values,
 )
-"""
 print("Done")

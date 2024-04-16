@@ -1,9 +1,10 @@
 [tool.pdm]
+distribution = true
 
 [project]
 name = "quintus"
 version = "0.1.0"
-description = "Help you find the optimal configuration from a set of materials."
+description = "A framework to enable fast material designs"
 authors = [
     {name = "Willi Zschiebsch", email = "willi.zschiebsch@gmail.com"},
 ]
@@ -11,21 +12,20 @@ dependencies = [
     "openpyxl>=3.1.1",
     "numpy>=1.25.0",
     "pymongo>=4.5.0",
-    "pydantic>=2.4.2",
     "pymaterial>=0.1.7",
     "psycopg[binary]>=3.1.10",
     "click>=8.1.7",
     "flask-login>=0.6.2",
+    "pydantic>=2.6.4",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
 [tool.pdm.dev-dependencies]
+server = [
+   "flask>=2.2.3",
+]
 test = [
     "pytest>=7.2.1",
     "pytest-cov>=4.0.0",
@@ -33,7 +33,12 @@ test = [
 
 [project.optional-dependencies]
 visual=[
-    "flask>=2.2.3",
     "plotly>=5.18.0",
+    "matplotlib>=3.8.3",
 ]
-all = ["quintus[visual,test]"]
+all = ["quintus[server,visual,test]"]
+
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
