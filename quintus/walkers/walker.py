@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from quintus.io import DataSet, DataWriter
+from quintus.composers import Composer
 from quintus.evals import Evaluation
-from quintus.evals.helpers import validate_evaluations
+from quintus.evals.helpers import validate_evaluations, sort_evaluations
 
 
 class DataWalker(ABC):
@@ -12,10 +13,11 @@ class DataWalker(ABC):
 
 class BasicDataWalker(DataWalker):
     def __init__(
-        self, dataset: DataSet, evaluations: set[Evaluation], writer: DataWriter
+        self, dataset: DataSet, composer: Composer, evaluations: set[Evaluation], writer: DataWriter
     ):
         validate_evaluations(evaluations)
 
         self.dataset = dataset
-        self.evaluations = evaluations
+        self.composer = composer
+        self.evaluations = sort_evaluations(evaluations)
         self.writer = writer

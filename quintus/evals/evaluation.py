@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from quintus.structures import Measurement
+from quintus.structures import Measurement, Component
 from quintus.helpers import parse_unit
 
 
@@ -20,7 +20,20 @@ class Evaluation(ABC):
         pass
 
     @abstractmethod
-    def filter_per_args(self) -> dict[str, dict]:
+    def get_required_names(self) -> set[str]:
+        """Filter per argument requred by the evaluation compute function.
+
+        Returns
+        -------
+        dict[str, dict]
+            key is the argument needed during computation.
+            dict is filter using the query system from MongoDB
+            (see: https://www.mongodb.com/docs/manual/tutorial/query-documents/)
+        """
+        pass
+
+    @abstractmethod
+    def filter_per_component(self) -> dict[str, dict]:
         """Filter per argument requred by the evaluation compute function.
 
         Returns
@@ -38,6 +51,8 @@ class Evaluation(ABC):
 
 
 def validate_kwargs(filters: dict[str, dict], raise_error=True, **kwargs) -> bool:
+    """
+    """
     args = list(kwargs.keys())
     keys = list(filters.keys())
 
@@ -54,7 +69,8 @@ class BasicEvaluation(Evaluation):
         self,
         name: str,
         unit: str | None,
-        filters: dict[str, dict] | None,
+        required_measurements: set[str] | None,
+        component_filters: dict[str, dict] | None,
     ):
         """Searches for a component with the help of a filter,
         then computes a single property and returns the property value with
@@ -71,10 +87,11 @@ class BasicEvaluation(Evaluation):
         """
         self.name = name
         self.unit = unit
-        self.filters = filters
+        self.required_measurements = required_measurements
+        self.component_filters = component_filters
 
     @abstractmethod
-    def __compute__(self, **kwargs) -> float:
+    def __compute__(self, component: Component) -> float:
         """Override the method to describe the evaluation computation.
         Don't call this method directly!
         It is meant to be called by evalute().
@@ -99,8 +116,20 @@ class BasicEvaluation(Evaluation):
             (the "set" prevents the usage the same names)
         """
         return {self.name}
+    
+    def get_required_names(self) -> set[str]:
+        """Filter per argument requred by the evaluation compute function.
 
-    def filter_per_args(self) -> dict[str, dict]:
+        Returns
+        -------
+        set[str]
+            key is the measuremnt needed during computation.
+        """
+        if self.required_measurements is None:
+            return set[str]()
+        return self.required_measurements
+
+    def filter_per_component(self) -> dict[str, dict]:
         """Filter per argument requred by the evaluation compute function.
 
         Returns
@@ -110,9 +139,9 @@ class BasicEvaluation(Evaluation):
             dict is filter using the query system from MongoDB
             (see: https://www.mongodb.com/docs/manual/tutorial/query-documents/)
         """
-        return self.filters
+        return self.component_filters
 
-    def evaluate(self, **kwargs) -> dict[str, Measurement]:
+    def evaluate(self, component: Component) -> dict[str, Measurement]:
         """main function to call when runing the
 
         Returns
@@ -121,9 +150,9 @@ class BasicEvaluation(Evaluation):
             keys are the same as given by get_results_names()
             Values are the results
         """
-        validate_kwargs(self.filter_per_args(), True, **kwargs)
+        # validate_kwargs(self.filter_per_args(), True, **kwargs)
         measurement = Measurement(
-            value=self.__compute__(**kwargs) / parse_unit(self.unit),
+            value=self.__compute__(component) / parse_unit(self.unit),
             unit=self.unit,
             source="computation",
         )

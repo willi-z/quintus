@@ -37,9 +37,9 @@ username = None
 password = None
 
 def is_special(data: dict) -> bool:
-    elements = data["composition"]
-    if "ElViS_p_6" in [element["name"] for element in elements.values()]:
-        return True
+    # elements = data["composition"]
+    # if "ElViS_p_6" in [element["name"] for element in elements.values()]:
+    #     return True
     return False
 
 
@@ -67,11 +67,11 @@ def plot_attr(
 
         def create_legend() -> str:
             legend = dict()
-            for etype, elem in elements.items():
+            for etype, elem in elements["components"].items():
                 legend[etype] = elem["name"]
             legend_text = "/".join(legend.values())
-            for property in ["areal_mass"]:
-                measurment = data["properties"]["areal_mass"]
+            for property in data["properties"].keys():
+                measurment = data["properties"][property]
                 val = np.round(measurment["value"], 3)
                 unit = measurment["unit"]
                 legend_text += "<br>"+f"{property}: {val} {unit}"

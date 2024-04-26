@@ -1,7 +1,9 @@
-# from ..__base__.datawriter import DataWriter
+from ..datawriter import DataWriter
+
 from quintus.helpers.id_generation import generate_id
-from quintus.structures import Component, ValidationError, Measurement
+from quintus.structures import Component, Composition, ValidationError, Measurement
 from quintus.helpers.parser import parse_value
+from quintus.composers import Composer
 
 from .configuration import ExcelConfiguration, update_config, ExcelSheetConfiguration
 from .legend import ExcelValueLegend
@@ -12,10 +14,12 @@ import json
 from pathlib import Path
 import warnings
 import io
+import logging
+logger = logging.getLogger(__name__)
 
 
 class ExcelReader:
-    def __init__(self, filename: str, config_file: str, writer):  # : DataWriter
+    def __init__(self, filename: str, config_file: str, writer: DataWriter, composers:set[Composer]= None):  # : DataWriter
         """Reads an Excel sheet with Data of ifferent components.
         Components can be grouped via the sheet name
         Values are color coded by a legend at the top left corner
@@ -42,6 +46,8 @@ class ExcelReader:
             print(ex)
 
         self.writer = writer
+
+        self.composers = composers
 
     def get_config(self) -> ExcelConfiguration:
         return self.config
@@ -133,12 +139,22 @@ class ExcelReader:
                 if cell_prefix is not None:
                     if not cell_prefix.startswith("{"):
                         if component.composition is None:
-                            component.composition = dict()
-                        if cell_prefix not in component.composition.keys():
+                            found_suitable_composer = False
+                            if self.composers is not None:
+                                for composer in self.composers:
+                                    if composer.is_compatible_with(cell_prefix):
+                                        found_suitable_composer = True
+                                        component.composition = composer.generate(dict())
+                                        logger.info(f"Detected compatible composer '{component.composition.type}' in row: '{cell.row}' (sheet: '{name}')")
+                                        break
+                            if not found_suitable_composer:
+                                component.composition = Composition(components=dict())
+                                logger.warning(f"Detected no compatible composer in row: '{cell.row}' (sheet: '{name}', column: '{cell.column}', prefix: '{cell_prefix}')")
+                        if cell_prefix not in component.composition.components.keys():
                             entry = Component(identifier=generate_id())
-                            component.composition[cell_prefix] = entry
+                            component.composition.components[cell_prefix] = entry
                         else:
-                            entry = component.composition[cell_prefix]
+                            entry = component.composition.components[cell_prefix]
                         if cell_name == "material":
                             cell_name = "name"
 

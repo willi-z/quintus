@@ -5,6 +5,8 @@ from quintus.evals.composites.battery.helpers import get_active_layer
 
 class ElectrodeCapacityCalc(BasicEvaluation):
     def __init__(self):
+        raise NotImplementedError()
+        """
         name = "areal_capacity"
 
         layers_filter = {
@@ -13,6 +15,7 @@ class ElectrodeCapacityCalc(BasicEvaluation):
 
         filters = {name: layers_filter}
         super().__init__(name, "C/m^2", filters)
+        """
 
     def __compute__(self, **kwargs) -> float:
         electrode = Component(**kwargs[self.name])

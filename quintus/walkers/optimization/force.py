@@ -70,13 +70,15 @@ class BruteForceOptimizer(Optimizer):
         for i in range(total_combinations):
             config = get_config(i)
             entry = Component(identifier=generate_id())
-            entry.composition = config
+            
+            components = dict[str, Component]()
+            for key in config.keys():
+                components[key] = Component(**config[key])
+            entry.composition = self.composer.generate(components)
             entry.properties = dict()
             for evaluation in self.evaluations:
-                entry.properties.update(evaluation.evaluate(**config))
-
-            for key in config.keys():
-                entry.composition[key] = Component(**entry.composition[key])
+                entry.properties.update(evaluation.evaluate(entry))
+            
             self.writer.write_entry(entry)
             print(
                 "\r" + f"BruteForceOptimizer: ({i + 1} / {total_combinations})", end=""

@@ -1,5 +1,5 @@
+from quintus.evals.composites.battery.battery import Battery
 from quintus.evals.composites.battery.evaluation import BatteryEvaluation
-from quintus.evals.composites.battery.helpers import generate_layup
 from .model import StiffComponent
 from quintus.structures import get_SI_value
 from pymaterial.materials import IsotropicMaterial, TransverselyIsotropicMaterial
@@ -19,15 +19,12 @@ class StiffnessEvaluation(BatteryEvaluation):
 
     def compute_battery(
         self,
-        anode: StiffComponent,
-        cathode: StiffComponent,
-        foil: StiffComponent,
-        separator: StiffComponent,
+        battery: Battery
     ) -> float:
-        layup = generate_layup(anode, cathode, foil, separator)
-
+        stackup = battery.get_stackup()
         plies = []
-        for layer in layup:
+        for key in stackup:
+            layer = battery.composition.components[key]
             layer_properties = layer.properties
             if layer_properties.get("E_t_yy") is None:
                 plies.append(

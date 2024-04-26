@@ -8,5 +8,6 @@ dist/
 *coverage*
 *secret*
 *result*
+*.log
 
 .pdm-python
