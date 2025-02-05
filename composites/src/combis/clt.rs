@@ -159,6 +159,7 @@ impl Stackup {
         Stackup::new(plies, PlyOrdering::BotToTop)
     }
 
+    #[rustfmt::skip]
     pub fn calc_abd(&self) -> na::SMatrix<f64, 6, 6> {
         let h = self.thickness / 2.0;
 
@@ -177,42 +178,12 @@ impl Stackup {
         }
 
         return na::SMatrix::<f64, 6, 6>::new(
-            mat_a[(0, 0)],
-            mat_a[(0, 1)],
-            mat_a[(0, 2)],
-            mat_b[(0, 0)],
-            mat_b[(0, 1)],
-            mat_b[(0, 2)],
-            mat_a[(1, 0)],
-            mat_a[(1, 1)],
-            mat_a[(1, 2)],
-            mat_b[(1, 0)],
-            mat_b[(1, 1)],
-            mat_b[(1, 2)],
-            mat_a[(2, 0)],
-            mat_a[(2, 1)],
-            mat_a[(2, 2)],
-            mat_b[(2, 0)],
-            mat_b[(2, 1)],
-            mat_b[(2, 2)],
-            mat_b[(0, 0)],
-            mat_b[(0, 1)],
-            mat_b[(0, 2)],
-            mat_d[(0, 0)],
-            mat_d[(0, 1)],
-            mat_d[(0, 2)],
-            mat_b[(1, 0)],
-            mat_b[(1, 1)],
-            mat_b[(1, 2)],
-            mat_d[(1, 0)],
-            mat_d[(1, 1)],
-            mat_d[(1, 2)],
-            mat_b[(2, 0)],
-            mat_b[(2, 1)],
-            mat_b[(2, 2)],
-            mat_d[(2, 0)],
-            mat_d[(2, 1)],
-            mat_d[(2, 2)],
+            mat_a[(0, 0)], mat_a[(0, 1)], mat_a[(0, 2)], mat_b[(0, 0)], mat_b[(0, 1)], mat_b[(0, 2)],
+            mat_a[(1, 0)], mat_a[(1, 1)], mat_a[(1, 2)], mat_b[(1, 0)], mat_b[(1, 1)], mat_b[(1, 2)],
+            mat_a[(2, 0)], mat_a[(2, 1)], mat_a[(2, 2)], mat_b[(2, 0)], mat_b[(2, 1)], mat_b[(2, 2)],
+            mat_b[(0, 0)], mat_b[(0, 1)], mat_b[(0, 2)], mat_d[(0, 0)], mat_d[(0, 1)], mat_d[(0, 2)],
+            mat_b[(1, 0)], mat_b[(1, 1)], mat_b[(1, 2)], mat_d[(1, 0)], mat_d[(1, 1)], mat_d[(1, 2)],
+            mat_b[(2, 0)], mat_b[(2, 1)], mat_b[(2, 2)], mat_d[(2, 0)], mat_d[(2, 1)], mat_d[(2, 2)],
         );
     }
 
@@ -408,6 +379,7 @@ mod tests {
     }
 
     #[test]
+    #[rustfmt::skip]
     fn test_strains() {
         let material = Material::TransverselyIsotropic(141000.0, 9340.0, 0.35, 4500.0, None, None);
 
@@ -415,16 +387,18 @@ mod tests {
             (
                 vec![Ply::new(material.clone(), 1.0, 45.0f64.to_radians())],
                 vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                vec![(vec![2.3e-06, 5.2e-05, -1.1e-04], vec![
-                    2.3e-06, 5.2e-05, -1.1e-04,
-                ])],
+                vec![(
+                    vec![2.3e-06, 5.2e-05, -1.1e-04], 
+                    vec![2.3e-06, 5.2e-05, -1.1e-04],
+                )],
             ),
             (
                 vec![Ply::new(material.clone(), 1.0, -45.0f64.to_radians())],
                 vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                vec![(vec![2.3e-06, 5.2e-05, 1.1e-04], vec![
-                    2.3e-06, 5.2e-05, 1.1e-04,
-                ])],
+                vec![(
+                    vec![2.3e-06, 5.2e-05, 1.1e-04], 
+                    vec![2.3e-06, 5.2e-05, 1.1e-04],
+                )],
             ),
         ];
 
