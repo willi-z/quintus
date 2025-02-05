@@ -1,4 +1,4 @@
-name: Publish Python Package
+name: Publish Rust Crate
 
 on:
   release:
@@ -9,16 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Setup PDM
-      uses: pdm-project/setup-pdm@v3
+    - uses: actions-rs/toolchain@v1
       with:
-        python-version: '3.8'
-        enable-pep582: true
-    - name: Install dependencies
-      run: pdm sync -d -G test
-    - name: Build
-      run: pdm build
-    - name: Publish a Python distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+          toolchain: stable
+          override: true
+    - uses: katyo/publish-crates@v2
       with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+          registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
