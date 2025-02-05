@@ -58,9 +58,7 @@ pub fn active_layers() -> Evaluation {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        structures::Measurement,
-    };
+    use crate::structures::Measurement;
 
     use super::*;
 
