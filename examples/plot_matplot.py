@@ -4,7 +4,7 @@ from secret_data.my_secret_path import mypath, username, password
 from pathlib import Path
 import sys
 import importlib.util
-spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"quintus/__init__.py"))
+spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"src/quintus/__init__.py"))
 quintus = importlib.util.module_from_spec(spec)
 sys.modules["quintus"] = quintus
 spec.loader.exec_module(quintus)
@@ -32,11 +32,14 @@ from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.collections import PathCollection
+from matplotlib.legend_handler import HandlerPathCollection
 from cycler import cycler
 import numpy as np
 
 username = None
 password = None
+
 
 light_plots = {
     "lines.color": "black",
@@ -53,11 +56,20 @@ light_plots = {
     "ytick.color": "black",
     "figure.facecolor": "white",
     "figure.edgecolor": "white",
+    "figure.dpi": 400,
+    "axes.labelsize": 20,
+    "axes.labelweight": "normal",
+    "font.size": 20,
+    'font.family' : 'Source Sans 3',
+    'lines.markersize':6,
+    "legend.handlelength": 1.0,
+    "legend.handletextpad": 0.4,
     # grid
     "axes.grid": True,
     "grid.color": "lightgray",
     "grid.linestyle": "dashed",
     # legend
+    "legend.fancybox": False,
     "legend.fancybox": False,
     "legend.edgecolor": "black",
     "legend.labelcolor": "black",
@@ -67,12 +79,17 @@ light_plots = {
     # "savefig.transparent": True,
 }
 
-colors = ["#6a7893","#9656a2", "#369acc", "#7cdd43", "#f8e16f", "#f4895f", "#de324c"]
+colors = ["#6a7893","#640D6B", "#BC5A94", "#369acc", "#7cdd43", "#f8e16f", "#f4895f", "#de324c"]
 
 plot_config = light_plots
 
+plt.rcParams.update(plot_config)
+
+draw_area_of_multifunctionalty = True
 el_benchmark = 245 # Wh/kg
 mech_benchmark = 30 # GPa
+y_max = mech_benchmark +2
+x_max = 250
 
 def ray_tracing_method(x,y,poly):
 
@@ -93,6 +110,12 @@ def ray_tracing_method(x,y,poly):
 
     return inside
 
+def change_marker(handle:PathCollection, original: PathCollection):
+    ''' Change the alpha and marker style of the legend handles '''
+    handle.update_from(original)
+    handle.set_alpha(1)
+    handle.set_sizes([130])
+
 
 def plot_attr(
     dataset,
@@ -102,7 +125,10 @@ def plot_attr(
     y_unit=None,
     extra_datas: list[Component] = None,
 ):
-    datas = dataset.find()
+    if dataset is not None:
+        datas = dataset.find()
+    else:
+        datas = dict()
     xs = []
     ys = []
     #legends = []
@@ -126,38 +152,41 @@ def plot_attr(
 
         measurment = data["properties"][y_attr]
         y = measurment["value"] * parse_unit(measurment["unit"]) / parse_unit(y_unit)
-        xs.append(x/2)
-        ys.append(y/8)
+        xs.append(x)
+        ys.append(y)
         
         #legends.append(create_legend())
 
-    fig, ax = plt.subplots(figsize=(4*1.5,3*1.5))
-    plt.rcParams.update(plot_config)
-
-    polygon_edges = np.array(
-        [
-            [float(el_benchmark), 0.0], 
-            [500.0, 0.0], 
-            [500.0, 32.0], 
-            [0.0, 32.0], 
-            [0.0, float(mech_benchmark)]
-        ],
-        dtype=np.float64
-    )
+    fig, ax = plt.subplots(figsize=(5*2,3*2))
     
-    inside_counter = 0
-    for i in range(len(xs)):
-        if ray_tracing_method(xs[i], ys[i], polygon_edges):
-            inside_counter = inside_counter + 1
 
-    print("No. of multifunctional points:", inside_counter)
-    polygon = matplotlib.patches.Polygon(polygon_edges, closed=True)
-    patch = matplotlib.collections.PatchCollection([polygon], alpha=0.4)
-    #colors = ["#01B04D"]
-    # patch.set_array(colors)
-    ax.add_collection(patch)
+    if draw_area_of_multifunctionalty:
+        polygon_edges = np.array(
+            [
+                [float(el_benchmark), 0.0], 
+                [x_max, 0.0], 
+                [x_max, y_max], 
+                [0.0, y_max], 
+                [0.0, float(mech_benchmark)]
+            ],
+            dtype=np.float64
+        )
 
-    ax.scatter(xs, ys, label="Quintus", color= colors[0])
+        inside_counter = 0
+        for i in range(len(xs)):
+            if ray_tracing_method(xs[i], ys[i], polygon_edges):
+                inside_counter = inside_counter + 1
+
+        print("No. of multifunctional points:", inside_counter)
+        polygon = matplotlib.patches.Polygon(polygon_edges, closed=True)
+        patch = matplotlib.collections.PatchCollection([polygon], alpha=0.2)
+        patch.set_color("#01B04D")
+        ax.add_collection(patch)
+
+        # ax.text(x=160, y=30, s="Area of Multi-\nfunctionality", verticalalignment='top', horizontalalignment='right', color='#005500')
+
+    if dataset is not None:
+        ax.scatter(xs, ys, label="QUINTUS prediction", color= colors[0], zorder=2.5)
 
     color_idx = 1
     if extra_datas is None:
@@ -169,7 +198,7 @@ def plot_attr(
         measurment = data.properties[y_attr]
         y = measurment.value * parse_unit(measurment.unit) / parse_unit(y_unit)
 
-        ax.scatter([x], [y], label=data.name, color=colors[color_idx])
+        ax.scatter([x], [y], label=data.name, color=colors[color_idx], edgecolors='black', zorder=2.5, s=80)
         color_idx = color_idx +1
 
     if x_unit is None:
@@ -183,10 +212,22 @@ def plot_attr(
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
+    ax.set_xlim([0, x_max])
+    ax.set_ylim([0, y_max])
     fig.tight_layout(pad=0.1)
-    ax.legend(loc="upper right")
 
-    outFile = Path().cwd() / ("result_quintus" + ".png")
+
+    if False:
+        ax.legend(
+            title="Legend",
+            loc="upper right",
+            handler_map={PathCollection: HandlerPathCollection(update_func=change_marker)}
+        )
+
+    if draw_area_of_multifunctionalty:
+        outFile = Path().cwd() / ("result_quintus_with_area" + ".png")
+    else: 
+        outFile = Path().cwd() / ("result_quintus" + ".png")
     plt.savefig(outFile)
     print(f"Saved: {outFile}")
 
@@ -201,6 +242,18 @@ literature_values = [
             ),
             "stiffness": Measurement(
                 value=25, unit="GPa", source="10.1002/aesr.202000093"
+            ),
+        },
+    ),
+    Component(
+        name="Saraj et al.",
+        description="Structural Battery from Saraj et al.",
+        properties={
+            "energy_density": Measurement(
+                value=41, unit="Wh/kg", source="10.1002/aesr.202300109"
+            ),
+            "stiffness": Measurement(
+                value=26, unit="GPa", source="10.1002/aesr.202300109"
             ),
         },
     ),

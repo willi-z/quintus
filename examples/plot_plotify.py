@@ -4,7 +4,7 @@ from secret_data.my_secret_path import mypath, username, password
 from pathlib import Path
 import sys
 import importlib.util
-spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"quintus/__init__.py"))
+spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"src/quintus/__init__.py"))
 quintus = importlib.util.module_from_spec(spec)
 sys.modules["quintus"] = quintus
 spec.loader.exec_module(quintus)
@@ -83,12 +83,12 @@ def plot_attr(
         measurment = data["properties"][y_attr]
         y = measurment["value"] * parse_unit(measurment["unit"]) / parse_unit(y_unit)
         if is_special(data):
-            specials["x"].append(x/2)
-            specials["y"].append(y/8)
+            specials["x"].append(x)
+            specials["y"].append(y)
             specials["text"].append(create_legend())
         else:
-            results["x"].append(x/2)
-            results["y"].append(y/8)
+            results["x"].append(x)
+            results["y"].append(y)
             results["text"].append(create_legend())
 
     fig = go.Figure()

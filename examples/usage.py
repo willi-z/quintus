@@ -6,7 +6,7 @@ import sys
 
 import importlib.util
 
-spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"quintus/__init__.py"))
+spec = importlib.util.spec_from_file_location("quintus", str(Path.cwd()/"src/quintus/__init__.py"))
 quintus = importlib.util.module_from_spec(spec)
 sys.modules["quintus"] = quintus
 spec.loader.exec_module(quintus)
@@ -22,8 +22,10 @@ from quintus.evals.component import ElectrodeCapacityCalc
 
 from quintus.evals.composites.battery import (
     BatteryStackupComposer,
-    CapacityEvaluation,  # noqa
+    CapacityEvaluation,
+    ThicknessEvaluation,
     ArealElectrolyteMass,
+    CellsEvaluation,
     StiffnessEvaluation,
     EnergyDensity,
     ArealMass
@@ -53,7 +55,7 @@ def read_from_excel():
         composers={ElectrodeComposer(), LayerComposer(), PhaseComposer()}
     ).read_all()
 
-# read_from_excel()
+read_from_excel()
 
 
 def data_extension():
@@ -79,7 +81,9 @@ def stage1_evaluation():
     # first simple evaluation
     composer = BatteryStackupComposer(NUM_ELECTRODE_LAYERS, OUTER_ELECTRODE_LAYER)
     evaluations = set()
+    evaluations.add(CellsEvaluation())
     evaluations.add(CapacityEvaluation())
+    evaluations.add(ThicknessEvaluation())
     evaluations.add(ArealElectrolyteMass())
     evaluations.add(StiffnessEvaluation())
     evaluations.add(EnergyDensity())
