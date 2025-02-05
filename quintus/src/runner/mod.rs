@@ -5,9 +5,9 @@ use log::warn;
 use crate::{
     evaluations::{
         composer::Composer,
-        evaluation::{self, Evaluation, SQLQuery},
+        evaluation::{Evaluation, SQLQuery},
     },
-    helpers::queries::{self, select_component_with_subcomponents, select_component_with_tags},
+    helpers::queries::{select_component_with_subcomponents, select_component_with_tags},
     io::traits::{DataSet, DataWriter, WriteModus},
     structures::{Component, ComponentType},
 };

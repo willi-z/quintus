@@ -102,11 +102,6 @@ pub fn areal_mass_evaluation() -> Evaluation {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        evaluations::battery::{new_battery_composer, Electrode},
-        structures::Measurement,
-    };
-
     use super::*;
 
     #[test]

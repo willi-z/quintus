@@ -59,7 +59,6 @@ pub fn active_layers() -> Evaluation {
 #[cfg(test)]
 mod tests {
     use crate::{
-        evaluations::battery::{new_battery_composer, Electrode},
         structures::Measurement,
     };
 

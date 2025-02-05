@@ -120,6 +120,7 @@ pub fn no_of_cells_in_stack(
     return num_cells;
 }
 
+#[cfg(test)]
 mod tests {
     use crate::evaluations::battery::{new_battery_composer, Electrode};
 

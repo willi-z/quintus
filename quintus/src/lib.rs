@@ -1,5 +1,5 @@
 pub mod evaluations;
-mod helpers;
+pub mod helpers;
 pub mod io;
 pub mod runner;
 pub mod server;
