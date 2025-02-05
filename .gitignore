@@ -1,14 +1,4 @@
-__pycache__/
-__pypackages__/
-.vscode/
-build/
-dist/
-
-*.egg-info/
-*coverage*
-*secret*
-*result*
-*.log
+/target
 *.png
-
-.pdm-python
+*.svg
+*.db
