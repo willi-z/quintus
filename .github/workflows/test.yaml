@@ -11,6 +11,8 @@ jobs:
     name: cargo test
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependencies for plotters
+        run: sudo apt-get install -y pkg-config libfreetype6-dev libfontconfig1-dev
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: cargo test --all-features
