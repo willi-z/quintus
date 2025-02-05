@@ -1,0 +1,40 @@
+{
+    "sheets":
+        {
+            "foil":
+            {
+                "tags": ["foil"]
+            },
+            "separator":
+            {
+                "tags": ["separator"]
+            },
+            "anode":
+            {
+                "tags": ["anode"]
+            },
+            "cathode":
+            {
+                "tags": ["cathode"]
+            },
+            "electrolyte":
+            {
+                "tags": ["electrolyte"]
+            }
+        },
+    "pointers": {
+    	"prefix": 5,
+        "names": 6,
+        "units": 7,
+        "start": 8
+    },
+    "transformers": {
+        "sources": {
+            "Imaginärer Wert": "APPROXIMATION",
+            "Literaturwert/Datenblatt": "LITERATURE",
+            "Experimentell bestimmt (+/-Fehler) ": "EXPERIMENT",
+            "berechnet": "COMPUTATION"
+        }
+    },
+    "ignore": ["Literature_screening"]
+}

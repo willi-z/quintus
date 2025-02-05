@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entity List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #search-bar {
+            margin-bottom: 20px;
+        }
+        #entity-list {
+            margin-top: 20px;
+        }
+        #new-entity-btn {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        // Function to fetch entities from the GET endpoint
+        async function fetchEntities() {
+            const response = await fetch('/api/entities');
+            const entities = await response.json();
+            displayEntities(entities);
+        }
+
+        // Function to display entities in the list
+        function displayEntities(entities) {
+            const entityList = document.getElementById('entity-list');
+            entityList.innerHTML = '';
+            entities.forEach(entity => {
+                const listItem = document.createElement('li');
+                listItem.textContent = entity.name;
+                entityList.appendChild(listItem);
+            });
+        }
+
+        // Function to filter entities based on search input
+        function filterEntities() {
+            const searchInput = document.getElementById('search-bar').value.toLowerCase();
+            const listItems = document.querySelectorAll('#entity-list li');
+            listItems.forEach(item => {
+                if (item.textContent.toLowerCase().includes(searchInput)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize the page by fetching entities
+        window.onload = fetchEntities;
+    </script>
+</head>
+<body>
+    <button id="new-entity-btn">Create New Entity</button>
+    <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterEntities()">
+    <ul id="entity-list"></ul>
+</body>
+</html>
