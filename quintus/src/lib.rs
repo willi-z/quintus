@@ -1,7 +1,7 @@
-mod helpers;
-pub mod structures;
-pub mod io;
 pub mod evaluations;
+mod helpers;
+pub mod io;
 pub mod runner;
-pub mod visualization;
 pub mod server;
+pub mod structures;
+pub mod visualization;

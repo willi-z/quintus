@@ -1,45 +1,65 @@
 use crate::material::Material;
 use nalgebra as na;
 
-pub enum ViewSystem{
+pub enum ViewSystem {
     Local,
-    Global
+    Global,
 }
 
-pub struct Ply{
+pub struct Ply {
     pub material: Material,
-    pub thickness: f64, 
-    pub rotation_in_rad: f64
+    pub thickness: f64,
+    pub rotation_in_rad: f64,
 }
 
-impl Ply{
-    pub fn new(material: Material, thickness: f64, rotation_in_rad: f64) -> Self{
-        Self { material: material, thickness: thickness, rotation_in_rad: rotation_in_rad }
+impl Ply {
+    pub fn new(material: Material, thickness: f64, rotation_in_rad: f64) -> Self {
+        Self {
+            material: material,
+            thickness: thickness,
+            rotation_in_rad: rotation_in_rad,
+        }
     }
     pub fn rotate(&self, rotation_in_rad: f64) -> Self {
-        Self { material: self.material.clone(), thickness: self.thickness, rotation_in_rad: self.rotation_in_rad + rotation_in_rad }
+        Self {
+            material: self.material.clone(),
+            thickness: self.thickness,
+            rotation_in_rad: self.rotation_in_rad + rotation_in_rad,
+        }
     }
 
-    pub fn get_stiffness(&self, view: ViewSystem) ->  na::SMatrix::<f64, 3, 3> {
+    pub fn get_stiffness(&self, view: ViewSystem) -> na::SMatrix<f64, 3, 3> {
         match view {
             ViewSystem::Local => return self.material.get_plane_strain_stiffness(),
             ViewSystem::Global => {
                 let c = self.rotation_in_rad.cos();
                 let s = self.rotation_in_rad.sin();
-            
+
                 let t_sigma = na::SMatrix::<f64, 3, 3>::new(
-                    c.powi(2), s.powi(2), -2.0 * s * c,
-                    s.powi(2), c.powi(2),  2.0 * s * c,
-                    s * c,    -s * c,    c.powi(2) - s.powi(2),
+                    c.powi(2),
+                    s.powi(2),
+                    -2.0 * s * c,
+                    s.powi(2),
+                    c.powi(2),
+                    2.0 * s * c,
+                    s * c,
+                    -s * c,
+                    c.powi(2) - s.powi(2),
                 );
-            
+
                 let t_sigma_t = na::SMatrix::<f64, 3, 3>::new(
-                    c.powi(2), s.powi(2),  s * c,
-                    s.powi(2), c.powi(2), -s * c,
-                   -2.0 * s * c,  2.0 * s * c, c.powi(2) - s.powi(2),
+                    c.powi(2),
+                    s.powi(2),
+                    s * c,
+                    s.powi(2),
+                    c.powi(2),
+                    -s * c,
+                    -2.0 * s * c,
+                    2.0 * s * c,
+                    c.powi(2) - s.powi(2),
                 );
-            
-                return t_sigma * self.material.get_plane_strain_stiffness() * t_sigma_t
+
+                return t_sigma * self.material.get_plane_strain_stiffness() * t_sigma_t;
             }
         }
     }
@@ -49,30 +69,41 @@ impl Ply{
         let s = self.rotation_in_rad.sin();
 
         let t_sigma_inv = na::SMatrix::<f64, 3, 3>::new(
-            c.powi(2), s.powi(2),  2.0 * c * s,
-            s.powi(2), c.powi(2), -2.0 * c * s,
-            -c * s,     c * s,    c.powi(2) - s.powi(2),
+            c.powi(2),
+            s.powi(2),
+            2.0 * c * s,
+            s.powi(2),
+            c.powi(2),
+            -2.0 * c * s,
+            -c * s,
+            c * s,
+            c.powi(2) - s.powi(2),
         );
 
         t_sigma_inv * stress
     }
-    
+
     pub fn get_local_strain(&self, strain: na::SVector<f64, 3>) -> na::SVector<f64, 3> {
         let c = self.rotation_in_rad.cos();
         let s = self.rotation_in_rad.sin();
 
         let t_epsilon_inv = na::SMatrix::<f64, 3, 3>::new(
-            c.powi(2), s.powi(2),  c * s,
-            s.powi(2), c.powi(2), -c * s,
-            -2.0 * c * s, 2.0 * c * s, c.powi(2) - s.powi(2),
+            c.powi(2),
+            s.powi(2),
+            c * s,
+            s.powi(2),
+            c.powi(2),
+            -c * s,
+            -2.0 * c * s,
+            2.0 * c * s,
+            c.powi(2) - s.powi(2),
         );
 
         t_epsilon_inv * strain
     }
-    
 }
 
-pub enum PlyOrdering{
+pub enum PlyOrdering {
     TopToBot,
     BotToTop,
 }
@@ -88,14 +119,14 @@ impl Stackup {
     pub fn new(mut plies: Vec<Ply>, ply_ordering: PlyOrdering) -> Self {
         match ply_ordering {
             PlyOrdering::TopToBot => plies.reverse(),
-            _=> (),
+            _ => (),
         }
-        
+
         let mut stackup = Self {
             plies,
             thickness: 0.0,
             density: None,
-            abd: na::SMatrix::<f64,6,6>::zeros(),
+            abd: na::SMatrix::<f64, 6, 6>::zeros(),
         };
         stackup.thickness = stackup.calc_thickness();
         stackup.abd = stackup.calc_abd();
@@ -107,16 +138,18 @@ impl Stackup {
     }
 
     pub fn calc_density(&self) -> Option<f64> {
-            // Check if any ply's material density is None
+        // Check if any ply's material density is None
         if self.plies.iter().any(|ply| ply.material.density.is_none()) {
-           return None;
+            return None;
         }
 
         // Perform the density calculation if all densities are Some
-        let thick_density: f64 = self.plies.iter()
+        let thick_density: f64 = self
+            .plies
+            .iter()
             .map(|ply| ply.thickness * ply.material.density.unwrap())
             .sum();
-            
+
         Some(thick_density / self.thickness)
     }
 
@@ -128,7 +161,7 @@ impl Stackup {
 
     pub fn calc_abd(&self) -> na::SMatrix<f64, 6, 6> {
         let h = self.thickness / 2.0;
-        
+
         let mut mat_a = na::SMatrix::<f64, 3, 3>::zeros();
         let mut mat_b = na::SMatrix::<f64, 3, 3>::zeros();
         let mut mat_d = na::SMatrix::<f64, 3, 3>::zeros();
@@ -144,17 +177,50 @@ impl Stackup {
         }
 
         return na::SMatrix::<f64, 6, 6>::new(
-            mat_a[(0, 0)], mat_a[(0, 1)], mat_a[(0, 2)], mat_b[(0, 0)], mat_b[(0, 1)], mat_b[(0, 2)],
-            mat_a[(1, 0)], mat_a[(1, 1)], mat_a[(1, 2)], mat_b[(1, 0)], mat_b[(1, 1)], mat_b[(1, 2)],
-            mat_a[(2, 0)], mat_a[(2, 1)], mat_a[(2, 2)], mat_b[(2, 0)], mat_b[(2, 1)], mat_b[(2, 2)],
-            mat_b[(0, 0)], mat_b[(0, 1)], mat_b[(0, 2)], mat_d[(0, 0)], mat_d[(0, 1)], mat_d[(0, 2)],
-            mat_b[(1, 0)], mat_b[(1, 1)], mat_b[(1, 2)], mat_d[(1, 0)], mat_d[(1, 1)], mat_d[(1, 2)],
-            mat_b[(2, 0)], mat_b[(2, 1)], mat_b[(2, 2)], mat_d[(2, 0)], mat_d[(2, 1)], mat_d[(2, 2)],
+            mat_a[(0, 0)],
+            mat_a[(0, 1)],
+            mat_a[(0, 2)],
+            mat_b[(0, 0)],
+            mat_b[(0, 1)],
+            mat_b[(0, 2)],
+            mat_a[(1, 0)],
+            mat_a[(1, 1)],
+            mat_a[(1, 2)],
+            mat_b[(1, 0)],
+            mat_b[(1, 1)],
+            mat_b[(1, 2)],
+            mat_a[(2, 0)],
+            mat_a[(2, 1)],
+            mat_a[(2, 2)],
+            mat_b[(2, 0)],
+            mat_b[(2, 1)],
+            mat_b[(2, 2)],
+            mat_b[(0, 0)],
+            mat_b[(0, 1)],
+            mat_b[(0, 2)],
+            mat_d[(0, 0)],
+            mat_d[(0, 1)],
+            mat_d[(0, 2)],
+            mat_b[(1, 0)],
+            mat_b[(1, 1)],
+            mat_b[(1, 2)],
+            mat_d[(1, 0)],
+            mat_d[(1, 1)],
+            mat_d[(1, 2)],
+            mat_b[(2, 0)],
+            mat_b[(2, 1)],
+            mat_b[(2, 2)],
+            mat_d[(2, 0)],
+            mat_d[(2, 1)],
+            mat_d[(2, 2)],
         );
     }
 
     pub fn apply_load(&self, mech_load: na::SVector<f64, 6>) -> na::SVector<f64, 6> {
-        let inv_abd = self.abd.try_inverse().expect("ABD matrix must be invertible");
+        let inv_abd = self
+            .abd
+            .try_inverse()
+            .expect("ABD matrix must be invertible");
         inv_abd * mech_load
     }
 
@@ -162,7 +228,10 @@ impl Stackup {
         self.abd * deformation
     }
 
-    pub fn get_strains(&self, deformation: na::SVector<f64, 6>) -> Vec<(na::SVector<f64, 3>, na::SVector<f64, 3>)> {
+    pub fn get_strains(
+        &self,
+        deformation: na::SVector<f64, 6>,
+    ) -> Vec<(na::SVector<f64, 3>, na::SVector<f64, 3>)> {
         let h = self.thickness / 2.0;
         let strain_membrane = deformation.fixed_rows::<3>(0).into_owned();
         let curvature = deformation.fixed_rows::<3>(3).into_owned();
@@ -185,13 +254,16 @@ impl Stackup {
         strains
     }
 
-    pub fn get_stresses(&self, strains: Vec<(na::SVector<f64, 3>, na::SVector<f64, 3>)>) -> Vec<(na::SVector<f64, 3>, na::SVector<f64, 3>)> {
+    pub fn get_stresses(
+        &self,
+        strains: Vec<(na::SVector<f64, 3>, na::SVector<f64, 3>)>,
+    ) -> Vec<(na::SVector<f64, 3>, na::SVector<f64, 3>)> {
         let mut stresses = Vec::new();
 
         for i in 0..self.plies.len() {
             let (strain_lt_bot, strain_lt_top) = strains[i];
 
-            let stiffness = self.plies[i].get_stiffness(ViewSystem::Local);  // Assuming get_stiffness() handles local=True
+            let stiffness = self.plies[i].get_stiffness(ViewSystem::Local); // Assuming get_stiffness() handles local=True
             let stress_lt_top = stiffness * strain_lt_top;
             let stress_lt_bot = stiffness * strain_lt_bot;
 
@@ -231,28 +303,30 @@ mod tests {
         (value * multiplier).round() / multiplier
     }
 
-
-
     #[test]
     fn test_abd_a() {
         let material = Material::TransverselyIsotropic(141000.0, 9340.0, 0.35, 4500.0, None, None);
 
         let test_cases: Vec<(Vec<Ply>, SMatrix<f64, 3, 3>)> = vec![
-            (vec![Ply::new(material.clone(), 1.0, 0.0)], na::SMatrix::from_row_slice(&[
-                142153.5, 3295.7, 0.0,
-                3295.7, 9416.4, 0.0,
-                0.0, 0.0, 4500.0,
-            ])),
-            (vec![Ply::new(material.clone(), 1.0, 45.0_f64.to_radians())], na::SMatrix::from_row_slice(&[
-                44040.4, 35040.4, 33184.3,
-                35040.4, 44040.4, 33184.3,
-                33184.3, 33184.3, 36244.6,
-            ])),
-            (vec![Ply::new(material.clone(), 1.0, -45.0_f64.to_radians())], na::SMatrix::from_row_slice(&[
-                44040.4, 35040.4, -33184.3,
-                35040.4, 44040.4, -33184.3,
-                -33184.3, -33184.3, 36244.6,
-            ])),
+            (
+                vec![Ply::new(material.clone(), 1.0, 0.0)],
+                na::SMatrix::from_row_slice(&[
+                    142153.5, 3295.7, 0.0, 3295.7, 9416.4, 0.0, 0.0, 0.0, 4500.0,
+                ]),
+            ),
+            (
+                vec![Ply::new(material.clone(), 1.0, 45.0_f64.to_radians())],
+                na::SMatrix::from_row_slice(&[
+                    44040.4, 35040.4, 33184.3, 35040.4, 44040.4, 33184.3, 33184.3, 33184.3, 36244.6,
+                ]),
+            ),
+            (
+                vec![Ply::new(material.clone(), 1.0, -45.0_f64.to_radians())],
+                na::SMatrix::from_row_slice(&[
+                    44040.4, 35040.4, -33184.3, 35040.4, 44040.4, -33184.3, -33184.3, -33184.3,
+                    36244.6,
+                ]),
+            ),
         ];
 
         for (plies, a_mat) in test_cases {
@@ -271,21 +345,24 @@ mod tests {
         let material = Material::TransverselyIsotropic(141000.0, 9340.0, 0.35, 4500.0, None, None);
 
         let test_cases: Vec<(Vec<Ply>, SMatrix<f64, 3, 3>)> = vec![
-            (vec![Ply::new(material.clone(), 1.0, 0.0)], na::SMatrix::from_row_slice(&[
-                11846.1, 274.6, 0.0,
-                274.6, 784.7, 0.0,
-                0.0, 0.0, 375.0,
-            ])),
-            (vec![Ply::new(material.clone(), 1.0, 45.0_f64.to_radians())], na::SMatrix::from_row_slice(&[
-                3670.0, 2920.0, 2765.4,
-                2920.0, 3670.0, 2765.4,
-                2765.4, 2765.4, 3020.4,
-            ])),
-            (vec![Ply::new(material.clone(), 1.0, -45.0_f64.to_radians())], na::SMatrix::from_row_slice(&[
-                3670.0, 2920.0, -2765.4,
-                2920.0, 3670.0, -2765.4,
-                -2765.4, -2765.4, 3020.4,
-            ])),
+            (
+                vec![Ply::new(material.clone(), 1.0, 0.0)],
+                na::SMatrix::from_row_slice(&[
+                    11846.1, 274.6, 0.0, 274.6, 784.7, 0.0, 0.0, 0.0, 375.0,
+                ]),
+            ),
+            (
+                vec![Ply::new(material.clone(), 1.0, 45.0_f64.to_radians())],
+                na::SMatrix::from_row_slice(&[
+                    3670.0, 2920.0, 2765.4, 2920.0, 3670.0, 2765.4, 2765.4, 2765.4, 3020.4,
+                ]),
+            ),
+            (
+                vec![Ply::new(material.clone(), 1.0, -45.0_f64.to_radians())],
+                na::SMatrix::from_row_slice(&[
+                    3670.0, 2920.0, -2765.4, 2920.0, 3670.0, -2765.4, -2765.4, -2765.4, 3020.4,
+                ]),
+            ),
         ];
 
         for (plies, b_mat) in test_cases {
@@ -307,12 +384,12 @@ mod tests {
             (
                 vec![Ply::new(material.clone(), 1.0, 45.0_f64.to_radians())],
                 na::SVector::from_row_slice(&[1.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-                na::SVector::from_row_slice(&[0.000083, -0.000028, -0.00005, 0.0, 0.0, 0.0])
+                na::SVector::from_row_slice(&[0.000083, -0.000028, -0.00005, 0.0, 0.0, 0.0]),
             ),
             (
                 vec![Ply::new(material.clone(), 1.0, -45.0_f64.to_radians())],
                 na::SVector::from_row_slice(&[1.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-                na::SVector::from_row_slice(&[0.000083, -0.000028, 0.00005, 0.0, 0.0, 0.0])
+                na::SVector::from_row_slice(&[0.000083, -0.000028, 0.00005, 0.0, 0.0, 0.0]),
             ),
         ];
 
@@ -322,7 +399,10 @@ mod tests {
             assert_eq!(deform.len(), deformations.len());
             for i in 0..deformations.len() {
                 let significance = get_significance(deformations[i]);
-                assert_eq!(round_to_nth_digit(deform[i], significance +2), deformations[i]);
+                assert_eq!(
+                    round_to_nth_digit(deform[i], significance + 2),
+                    deformations[i]
+                );
             }
         }
     }
@@ -335,12 +415,16 @@ mod tests {
             (
                 vec![Ply::new(material.clone(), 1.0, 45.0f64.to_radians())],
                 vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                vec![(vec![2.3e-06, 5.2e-05, -1.1e-04], vec![2.3e-06, 5.2e-05, -1.1e-04])],
+                vec![(vec![2.3e-06, 5.2e-05, -1.1e-04], vec![
+                    2.3e-06, 5.2e-05, -1.1e-04,
+                ])],
             ),
             (
                 vec![Ply::new(material.clone(), 1.0, -45.0f64.to_radians())],
                 vec![1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                vec![(vec![2.3e-06, 5.2e-05, 1.1e-04], vec![2.3e-06, 5.2e-05, 1.1e-04])],
+                vec![(vec![2.3e-06, 5.2e-05, 1.1e-04], vec![
+                    2.3e-06, 5.2e-05, 1.1e-04,
+                ])],
             ),
         ];
 
@@ -355,12 +439,18 @@ mod tests {
                 let stress = &strains[i].0;
                 for j in 0..stress.len() {
                     let significance = get_significance(stress[j]) as i32;
-                    assert_eq!(round_to_nth_digit(layer_strains[i].1[j], significance + 2), stress[j]);
+                    assert_eq!(
+                        round_to_nth_digit(layer_strains[i].1[j], significance + 2),
+                        stress[j]
+                    );
                 }
                 let stress = &strains[i].1;
                 for j in 0..stress.len() {
                     let significance = get_significance(stress[j]) as i32;
-                    assert_eq!(round_to_nth_digit(layer_strains[i].1[j], significance + 2), stress[j]);
+                    assert_eq!(
+                        round_to_nth_digit(layer_strains[i].1[j], significance + 2),
+                        stress[j]
+                    );
                 }
             }
         }
@@ -369,7 +459,7 @@ mod tests {
     #[test]
     fn test_stresses() {
         let material = Material::TransverselyIsotropic(141000.0, 9340.0, 0.35, 4500.0, None, None);
-        
+
         let cases = vec![
             (
                 vec![Ply::new(material.clone(), 1.0, 45.0f64.to_radians())],
@@ -395,12 +485,18 @@ mod tests {
                 let stress = &stresses[i].0;
                 for j in 0..stress.len() {
                     let significance = get_significance(stress[j]) as i32;
-                    assert_eq!(round_to_nth_digit(layer_stresses[i].1[j], significance + 1), stress[j]);
+                    assert_eq!(
+                        round_to_nth_digit(layer_stresses[i].1[j], significance + 1),
+                        stress[j]
+                    );
                 }
                 let stress = &stresses[i].1;
                 for j in 0..stress.len() {
                     let significance = get_significance(stress[j]) as i32;
-                    assert_eq!(round_to_nth_digit(layer_stresses[i].1[j], significance + 1), stress[j]);
+                    assert_eq!(
+                        round_to_nth_digit(layer_stresses[i].1[j], significance + 1),
+                        stress[j]
+                    );
                 }
             }
         }
