@@ -10,7 +10,7 @@ flag_management:
   individual_flags:
     - name: helpers
       paths:
-      - quintus/helpers
+      - quintus/src/helpers
       carryforward: true
       statuses:
         - type: project
@@ -19,7 +19,7 @@ flag_management:
           target: 100%
     - name: structures
       paths:
-      - quintus/structures
+      - quintus/src/structures
       carryforward: true
       statuses:
         - type: project
@@ -28,25 +28,34 @@ flag_management:
           target: 100%
     - name: io
       paths:
-      - quintus/io
+      - quintus/src/io
       carryforward: true
       statuses:
       - type: project
         target: 20%
       - type: patch
         target: 100%
-    - name: evals
+    - name: evaluations
       paths:
-      - quintus/evals
+      - quintus/src/evaluations
       carryforward: true
       statuses:
       - type: project
         target: 20%
       - type: patch
         target: 100%
-    - name: walkers
+    - name: runner
       paths:
-      - quintus/walkers
+      - quintus/src/runner
+      carryforward: true
+      statuses:
+      - type: project
+        target: 20%
+      - type: patch
+        target: 100%
+    - name: composites
+      paths:
+      - composites/src
       carryforward: true
       statuses:
       - type: project
