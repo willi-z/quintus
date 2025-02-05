@@ -23,7 +23,7 @@ The there are two ways:
 
 see only warning when executing main.rs:
 ```
-RUST_LOG=debug cargo run --bin main.rs
+RUST_LOG=warn cargo run --bin main
 ```
 
 Testing
