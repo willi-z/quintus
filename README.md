@@ -1,6 +1,6 @@
 # Quintus
 
-[![Rust package](https://github.com/willi-z/quintus/actions/workflows/test.yml/badge.svg)](https://github.com/willi-z/quintus/actions/workflows/test.yaml)
+[![Rust package](https://github.com/willi-z/quintus/actions/workflows/test.yaml/badge.svg)](https://github.com/willi-z/quintus/actions/workflows/test.yaml)
 [![codecov](https://codecov.io/gh/willi-z/quintus/branch/master/graph/badge.svg?token=TM9VDQMA4L)](https://codecov.io/gh/willi-z/quintus)
 
 ---
