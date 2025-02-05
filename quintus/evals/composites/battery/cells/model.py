@@ -5,8 +5,7 @@ class ElectrodeComponent(Component):
     composition: Composition = Composition(
         component = {
             "active layer": Component(
-                properties={"areal_capacity": Measurement()}
+                properties={"layers": Measurement()}
             )
         }
     )
- # type: ignore

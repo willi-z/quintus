@@ -42,11 +42,11 @@ def sort_evaluations(
         is_inserted = False
         for i in range(len(evaluation_order)):
             exisiting = evaluation_order[i]
-            if len(exisiting.get_required_names() & outputs) >= 1:
+            if len(exisiting.get_required_names().intersection(outputs)) >= 1:
                 evaluation_order.insert(i, evaluation)
                 is_inserted = True
                 break
-            elif len(inputs) < len(exisiting.get_required_names()):
+            if len(inputs) < len(exisiting.get_required_names()):
                 evaluation_order.insert(i, evaluation)
                 is_inserted = True
                 break

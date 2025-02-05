@@ -26,5 +26,5 @@ class ArealMass(BatteryEvaluation):
             layer = battery.composition.components[key]
             layer_properties = layer.properties
             m_sum += get_SI_value(layer_properties.get("areal_mass"))
-        # m_sum += get_SI_value(battery.properties.get("areal_electrolyte_mass"))
+        m_sum += get_SI_value(battery.properties.get("areal_electrolyte_mass"))
         return m_sum 

@@ -10,7 +10,7 @@ class StiffnessEvaluation(BatteryEvaluation):
     def __init__(self):
         super().__init__(
             "stiffness",
-            "N/m^2",
+            "GPa",
             anode=StiffComponent(),
             cathode=StiffComponent(),
             foil=StiffComponent(),
@@ -52,4 +52,4 @@ class StiffnessEvaluation(BatteryEvaluation):
                 )
         stackup = Stackup(plies=plies, bot_to_top=True)
         homo = stackup.calc_homogenized()
-        return homo.E_l
+        return homo.E_l/8

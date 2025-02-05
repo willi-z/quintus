@@ -10,7 +10,7 @@ units = {
     "dm": 1e-1,
     "cm": 1e-2,
     "mm": 1e-3,
-    "µm": 1e-6,
+    "µ": 1e-6,
     "%": 1e-2,
     "V": 1,
     "Pa": 1,
@@ -19,8 +19,9 @@ units = {
     "GPa": 1e9,
     "°C": "change system",
     "C": 1,
-    "Wh": 60 * 60,
+    "W": 1,
     "N": 1,
+    "L": 1e-3,
 }
 
 operators = {"^": "**"}
@@ -44,6 +45,10 @@ def parse_unit(unit: str) -> float:
     """
     if unit is None:
         return 1
+    
+    if "/" in unit:
+        slash_pos = unit.find("/")+1
+        unit = unit[:slash_pos] + "(" +  unit[slash_pos:] +")"
 
     for key in units:
         # check each unit in list
@@ -51,12 +56,17 @@ def parse_unit(unit: str) -> float:
         if index != -1:
             # if unit exists in expression
             # replace it with the value
-            unit = unit.replace(key, str(units.get(key)))
-            if index - 1 <= 0:
-                continue
-            if unit[index - 1].isalpha() or unit[index - 1].isnumeric():
-                """ """
-                unit = unit[:index] + "*" + unit[index:]
+            value = str(units.get(key))
+            unit = unit.replace(key, value)
+
+            if index - 1 > 0:
+                if unit[index - 1].isalpha() or unit[index - 1].isnumeric():
+                    """ """
+                    unit = unit[:index] + "*" + unit[index:]
+            if index + len(value) < len(unit):
+                if unit[index + len(value)].isalpha() or unit[index + len(value)].isnumeric():
+                    """ """
+                    unit = unit[:index + len(value)] + "*" + unit[index + len(value):]
 
     for key in operators:
         unit = unit.replace(key, str(operators.get(key)))
