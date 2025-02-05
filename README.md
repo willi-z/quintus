@@ -1,24 +1,39 @@
 # Quintus
 
-[![Python package](https://github.com/willi-z/quintus/actions/workflows/test.yml/badge.svg)](https://github.com/willi-z/quintus/actions/workflows/test.yml)
+[![Rust package](https://github.com/willi-z/quintus/actions/workflows/test.yml/badge.svg)](https://github.com/willi-z/quintus/actions/workflows/test.yaml)
 [![codecov](https://codecov.io/gh/willi-z/quintus/branch/master/graph/badge.svg?token=TM9VDQMA4L)](https://codecov.io/gh/willi-z/quintus)
-[![pdm-managed](https://img.shields.io/badge/pdm-managed-blueviolet)](https://pdm.fming.dev)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ---
 
 Help you find the optimal configuration from a set of materials.
 
+Experiments are important, but testing every possible combination is not feasible. This is where QUINTUS comes to the rescue. QUINTUS scans material databases, combines materials, and predicts their combined properties.
 
-The idea is to have a dataset of material data, which are evaluated over multiple levels.
-After each level, the best materials and possible combinations are determined.
-Further, missing properties are listed that are required for the next level.
+This allows experimentalists to focus on the most promising ones.
 
 
-``````
+## Usage
+
+The there are two ways:
+1. import the data an EXCEL-file with a additional data in a JSON-config file (see examples)
+2. open a graphical user interface in your browser (work in progress)
 
 
 ## Development
 
+see only warning when executing main.rs:
+```
+RUST_LOG=debug cargo run --bin main.rs
+```
+
+Testing
+```
+RUST_LOG=debug cargo test
+```
+
+Coverage
+```
+cargo install cargo-llvm-cov
+cargo llvm-cov
+```
 https://api.codecov.io/validate
