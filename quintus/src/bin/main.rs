@@ -171,7 +171,14 @@ fn main() {
     plot_properties(
         sql,
         &_png,
-        &vec![("energy_density", &energy_unit, Some("Energiedichte [Wh/kg]")), ("stiffness", &stiff_unit, Option::Some("E-Modul [GPa]"))],
+        &vec![
+            (
+                "energy_density",
+                &energy_unit,
+                Some("Energiedichte [Wh/kg]"),
+            ),
+            ("stiffness", &stiff_unit, Option::Some("E-Modul [GPa]")),
+        ],
         Some(benchmarks),
     )
     .expect("Should not fail!");
