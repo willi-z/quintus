@@ -3,12 +3,12 @@ use core::f64;
 use plotters::{
     coord::Shift,
     prelude::{
-        ChartBuilder, Circle, DrawingArea, DrawingBackend, FontStyle, PathElement, Polygon, Text,
+        ChartBuilder, Circle, DrawingArea, DrawingBackend, FontStyle, PathElement, Polygon,
         TextStyle, BLACK,
     },
     style::{
         text_anchor::{HPos, Pos, VPos},
-        Color, FontDesc, FontFamily, FontTransform, IntoFont, IntoTextStyle, RGBAColor, ShapeStyle,
+        Color, FontDesc, FontFamily, FontTransform, IntoTextStyle, RGBAColor, ShapeStyle,
         WHITE,
     },
 };
