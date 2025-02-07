@@ -3,61 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entity List</title>
+    <title>QUINTUS</title>
     <style>
+        header {
+            height: 5vh;
+            padding: 1vh 1vw;
+        }
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
         }
-        #search-bar {
-            margin-bottom: 20px;
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 50px 0;
         }
-        #entity-list {
-            margin-top: 20px;
+        .title {
+            font-size: 48px;
+            margin-bottom: 50px;
         }
-        #new-entity-btn {
-            margin-bottom: 10px;
+        .logos {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 50px;
+        }
+        .logos img {
+            height: 5vh;
+        }
+        .documentation {
+            margin-bottom: 50px;
+        }
+        .upload {
+            border: 2px dashed #ccc;
+            padding: 50px;
+            background-color: #fff;
+            cursor: pointer;
         }
     </style>
-    <script>
-        // Function to fetch entities from the GET endpoint
-        async function fetchEntities() {
-            const response = await fetch('/api/entities');
-            const entities = await response.json();
-            displayEntities(entities);
-        }
-
-        // Function to display entities in the list
-        function displayEntities(entities) {
-            const entityList = document.getElementById('entity-list');
-            entityList.innerHTML = '';
-            entities.forEach(entity => {
-                const listItem = document.createElement('li');
-                listItem.textContent = entity.name;
-                entityList.appendChild(listItem);
-            });
-        }
-
-        // Function to filter entities based on search input
-        function filterEntities() {
-            const searchInput = document.getElementById('search-bar').value.toLowerCase();
-            const listItems = document.querySelectorAll('#entity-list li');
-            listItems.forEach(item => {
-                if (item.textContent.toLowerCase().includes(searchInput)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        // Initialize the page by fetching entities
-        window.onload = fetchEntities;
-    </script>
 </head>
 <body>
-    <button id="new-entity-btn">Create New Entity</button>
-    <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterEntities()">
-    <ul id="entity-list"></ul>
+    <header>
+        <div class="logos">
+            <img src="assets/logos/htwk.png" alt="HTWK Logo" height="100">
+            <img src="assets/logos/tud+ilk.png" alt="Intitut für Leichtbau und Kunstofftechnik Logo">
+            <img src="assets/logos/fraunhofer.png" alt="Fraunhofer IWS Logo">
+        </div>
+    </header>
+    <div class="container">
+        <div class="title">QUINTUS</div>
+        <div class="documentation">
+            <a href="documentation.html">View Documentation</a>
+        </div>
+        <div class="upload" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+            Drag & Drop to Upload a File or Click to Open Dialog
+            <input type="file" style="display: none;" onchange="uploadFile(event);">
+        </div>
+        <div class="documentation">
+            <a href="/overview">View Data</a>
+        </div>
+    </div>
+
+    <script>
+        const uploadDiv = document.querySelector('.upload');
+        uploadDiv.addEventListener('click', () => {
+            const fileInput = uploadDiv.querySelector('input[type="file"]');
+            fileInput.click();
+        });
+
+        function dropHandler(event) {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            alert(`File dropped: ${file.name}`);
+            console.log(`File path: ${file.originalname || 'Not supported'}`);
+            // Add your file upload handling logic here
+        }
+
+        function dragOverHandler(event) {
+            event.preventDefault();
+        }
+
+        function uploadFile(event) {
+            const file = event.target.files[0];
+            alert(`File selected: ${file.name}`);
+            console.log(`File path: ${file.originalname || 'Not supported'}`);
+            // Add your file upload handling logic here
+        }
+    </script>
 </body>
 </html>

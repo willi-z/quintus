@@ -50,7 +50,7 @@ impl SourceType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Source {
     pub source_type: SourceType,
     pub remark: String,
@@ -62,7 +62,7 @@ impl CanBeEmpty for Source {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Tolerance {
     pub max: f64,
     pub min: f64,
@@ -74,7 +74,7 @@ impl CanBeEmpty for Tolerance {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Unit {
     pub unit: String,
     pub to_si_factor: f64,
@@ -132,7 +132,7 @@ impl Unit {
 
 pub type ID = String;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Measurement {
     pub id: ID,
     pub name: String,
@@ -161,7 +161,7 @@ impl Measurement {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub enum CompositionType {
     PURE,
     LAYERED,
@@ -190,7 +190,7 @@ pub type ComponentType = String;
 pub type Tag = String;
 pub type PropertyName = String;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Component {
     pub id: ID,
     pub name: String,

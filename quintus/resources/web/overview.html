@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entity List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #search-bar {
+            margin-bottom: 20px;
+        }
+        #entity-list {
+            margin-top: 20px;
+        }
+        #new-entity-btn {
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        // Function to fetch entities from the GET endpoint
+        async function fetchComponents() {
+            const response = await fetch('/api/components');
+            const entities = await response.json();
+            displayComponents(entities);
+        }
+
+        // Function to display entities in the list
+        function displayComponents(componentsList) {
+            const entityHTMLList = document.getElementById('entity-list');
+            entityHTMLList.innerHTML = '';
+            componentsList.forEach(component => {
+                const componentHTMLItem = document.createElement('div');
+                componentHTMLItem.id = component.id;
+                componentHTMLItem.textContent = component.name;
+                componentHTMLItem.onclick = function(){showInfo(componentHTMLItem)};
+                const infoHTML = document.createElement('div');
+                infoHTML.className = 'info';
+                componentHTMLItem.appendChild(infoHTML);
+                const componentsHTMLList= document.createElement('ul');
+                const composition = component.composition;
+                if (composition != null) {
+                    console.log(composition);
+                    for (var cType in composition){
+                        const cItem = document.createElement('li');
+                        cItem.innerHTML = `<a href="#${composition[cType]}">${cType}</a>`;
+                        componentsHTMLList.appendChild(cItem);
+                    }
+                }
+                infoHTML.appendChild(componentsHTMLList);
+                entityHTMLList.appendChild(componentHTMLItem);
+            });
+        }
+
+        // Function to filter entities based on search input
+        function filterEntities() {
+            const searchInput = document.getElementById('search-bar').value.toLowerCase();
+            const listItems = document.querySelectorAll('#entity-list div');
+            listItems.forEach(item => {
+                if (item.textContent.toLowerCase().includes(searchInput)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function showInfo(element) {
+            const info = element.querySelector('.info');
+            if (info.style.display === 'none' || info.style.display === '') {
+                info.style.display = 'block';
+            } else {
+                info.style.display = 'none';
+            }
+        }
+        // Initialize the page by fetching entities
+        window.onload = fetchComponents;
+    </script>
+</head>
+<body>
+    <button id="new-entity-btn">Create New Entity</button>
+    <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterEntities()">
+    <div id="entity-list"></div>
+</body>
+</html>
