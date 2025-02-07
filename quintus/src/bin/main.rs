@@ -1,10 +1,8 @@
 use plotters::prelude::{BitMapBackend, IntoDrawingArea, SVGBackend};
 use quintus::evaluations::battery::new_battery_composer;
 use quintus::io::traits::{DataReader, DataWriter, WriteModus};
-
 use quintus::structures::{Component, Measurement, Source, Unit};
 use quintus::visualization::plot_properties;
-// use quintus::io::excel::*;
 use quintus::{
     evaluations::{battery, filler},
     io::{excel::ExcelData, sqlite::SQLiteData},
@@ -160,8 +158,8 @@ fn main() {
     data_extension(&mut sql);
     data_evaluation(&mut sql);
 
-    let _png = BitMapBackend::new("./plot.png", (600, 600)).into_drawing_area();
-    let _svg = SVGBackend::new("./plot.svg", (600, 600)).into_drawing_area();
+    let _png = BitMapBackend::new("./plot.png", (800, 800)).into_drawing_area();
+    // let _svg = SVGBackend::new("./plot.svg", (600, 600)).into_drawing_area();
     let energy_unit = Unit::from(&("Wh/kg").to_string()).unwrap();
     println!("{} => {}", energy_unit.unit, energy_unit.to_si_factor);
     let stiff_unit = Unit::from(&("GPa".to_string())).unwrap();
@@ -173,7 +171,7 @@ fn main() {
     plot_properties(
         sql,
         &_png,
-        &vec![("energy_density", &energy_unit), ("stiffness", &stiff_unit)],
+        &vec![("energy_density", &energy_unit, Some("Energiedichte [Wh/kg]")), ("stiffness", &stiff_unit, Option::Some("E-Modul [GPa]"))],
         Some(benchmarks),
     )
     .expect("Should not fail!");
