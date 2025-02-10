@@ -3,11 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entity List</title>
+    <title>Component List</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/overview.js"></script> 
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 20px;
+        }
+        header {
+            position: fixed;
+            top: 0px;
+            height: 10vh;
+        }
+        main {
+            height: 90vh;
+        }
+        .container {
+          display: flex;
+        }
+        .main-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px; /* Rounded corners */
+            margin-bottom: 10px;
+        }
+        .column {
+          flex: 1;
+          padding: 10px;
+          box-sizing: border-box;
+          overflow-y: auto; /* Enable vertical scrolling */
+        }
+        .column .main-field .component:nth-child(odd) {
+            background-color: #f0f0f0;
+        }
+        .column .main-field .component:nth-child(even) {
+            background-color: #ebebeb;
+        }
+        .icons{
+            display:flex;
+            justify-content: space-between;
+            width: 15%;
+        }
+        .expandable-content {
+          display: none;
+          /*background-color: #fff;*/
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 10px;
+          margin-top: 10px;
+        }
+        .tags span {
+          display: inline-block;
+          background-color: #d3d3d3;
+          padding: 5px;
+          margin-right: 5px;
+          border-radius: 3px;
+        }
+        .links-container {
+          display: flex;
+          justify-content: space-between;
+        }
+        .links {
+          flex: 1;
+          margin-right: 10px;
+        }
+        .links:last-child {
+          margin-right: 0;
         }
         #search-bar {
             margin-bottom: 20px;
@@ -20,68 +84,81 @@
         }
     </style>
     <script>
-        // Function to fetch entities from the GET endpoint
-        async function fetchComponents() {
-            const response = await fetch('/api/components');
-            const entities = await response.json();
-            displayComponents(entities);
+        function updateComponent() {
+            const updatedValues = JSONfromComponentForm('component-form');
+            console.log(updatedValues);
+
+            // Sending update request
+            fetch('/api/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedValues)
+            })
+            .then(response => response.json())
+            .then(data => console.log('Success:', data))
+            .catch(error => console.error('Error:', error));
         }
 
-        // Function to display entities in the list
-        function displayComponents(componentsList) {
-            const entityHTMLList = document.getElementById('entity-list');
-            entityHTMLList.innerHTML = '';
-            componentsList.forEach(component => {
-                const componentHTMLItem = document.createElement('div');
-                componentHTMLItem.id = component.id;
-                componentHTMLItem.textContent = component.name;
-                componentHTMLItem.onclick = function(){showInfo(componentHTMLItem)};
-                const infoHTML = document.createElement('div');
-                infoHTML.className = 'info';
-                componentHTMLItem.appendChild(infoHTML);
-                const componentsHTMLList= document.createElement('ul');
-                const composition = component.composition;
-                if (composition != null) {
-                    console.log(composition);
-                    for (var cType in composition){
-                        const cItem = document.createElement('li');
-                        cItem.innerHTML = `<a href="#${composition[cType]}">${cType}</a>`;
-                        componentsHTMLList.appendChild(cItem);
-                    }
-                }
-                infoHTML.appendChild(componentsHTMLList);
-                entityHTMLList.appendChild(componentHTMLItem);
-            });
-        }
-
-        // Function to filter entities based on search input
-        function filterEntities() {
-            const searchInput = document.getElementById('search-bar').value.toLowerCase();
-            const listItems = document.querySelectorAll('#entity-list div');
-            listItems.forEach(item => {
-                if (item.textContent.toLowerCase().includes(searchInput)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        function showInfo(element) {
-            const info = element.querySelector('.info');
-            if (info.style.display === 'none' || info.style.display === '') {
-                info.style.display = 'block';
-            } else {
-                info.style.display = 'none';
-            }
-        }
+        
         // Initialize the page by fetching entities
         window.onload = fetchComponents;
     </script>
 </head>
 <body>
-    <button id="new-entity-btn">Create New Entity</button>
-    <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterEntities()">
-    <div id="entity-list"></div>
+    <header>
+        <button id="new-entity-btn">Create New Entity</button>
+        <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterEntities()">
+    </header>
+    <main>
+        <div class="container" style="height: 100%;">
+            <div class="column" id="component-list"></div>
+            <div class="column" id="component-details">
+                <div id="component-form" style="display: none;">
+                    <span class="id"></span>
+                    <div class="name">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name">
+                    </div>
+                    <br><br>
+                    <div class="description">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description"></textarea>
+                    </div>
+                    <br><br>
+
+                    <div class="tags">
+                        <label for="tags">Tags:</label>
+                        <input type="text" id="tags" name="tags"><br><br>
+                        <div class="container">
+                            <!-- Tags will be generated here -->
+                        </div>
+                    </div>
+                    
+
+                    <div class="composition">
+                        <h3>Composition</h3>
+                        <div class="container">
+                            <!-- Sub Components will be generated here -->
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="properties">
+                        <h3>Properties</h3>
+                        <div class="container">
+                            <!-- Properties will be generated here -->
+                        </div>
+                    </div>
+                    <br>
+                    <button type="button" onclick="updateComponent()">Update</button>
+                </div>
+            </div>
+            <div class="column" id="component-editor"></div>
+        </div>
+    </main>
+    
+    
 </body>
 </html>
