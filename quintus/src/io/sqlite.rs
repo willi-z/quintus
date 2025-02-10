@@ -13,7 +13,7 @@ use std::{
 
 #[derive(Clone)]
 pub struct SQLiteData {
-    conn: Arc<Mutex<Connection>>,
+    pub conn: Arc<Mutex<Connection>>,
     idx_view: String,
 }
 
