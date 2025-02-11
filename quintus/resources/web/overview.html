@@ -4,85 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Component List</title>
+    <link rel="stylesheet" href="assets/css/normalize.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/overview.css">
     <script src="assets/js/overview.js"></script> 
-    <style>
-        body {
-            margin: 20px;
-        }
-        header {
-            position: fixed;
-            top: 0px;
-            height: 10vh;
-        }
-        main {
-            height: 90vh;
-        }
-        .container {
-          display: flex;
-        }
-        .main-field {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 20px; /* Rounded corners */
-            margin-bottom: 10px;
-        }
-        .column {
-          flex: 1;
-          padding: 10px;
-          box-sizing: border-box;
-          overflow-y: auto; /* Enable vertical scrolling */
-        }
-        .column .main-field .component:nth-child(odd) {
-            background-color: #f0f0f0;
-        }
-        .column .main-field .component:nth-child(even) {
-            background-color: #ebebeb;
-        }
-        .icons{
-            display:flex;
-            justify-content: space-between;
-            width: 15%;
-        }
-        .expandable-content {
-          display: none;
-          /*background-color: #fff;*/
-          padding: 10px;
-          border: 1px solid #ccc;
-          border-radius: 10px;
-          margin-top: 10px;
-        }
-        .tags span {
-          display: inline-block;
-          background-color: #d3d3d3;
-          padding: 5px;
-          margin-right: 5px;
-          border-radius: 3px;
-        }
-        .links-container {
-          display: flex;
-          justify-content: space-between;
-        }
-        .links {
-          flex: 1;
-          margin-right: 10px;
-        }
-        .links:last-child {
-          margin-right: 0;
-        }
-        #search-bar {
-            margin-bottom: 20px;
-        }
-        #entity-list {
-            margin-top: 20px;
-        }
-        #new-entity-btn {
-            margin-bottom: 10px;
-        }
-    </style>
     <script>
         function updateComponent() {
             const updatedValues = JSONfromComponentForm('component-form');
@@ -112,50 +37,102 @@
         <input type="text" id="search-bar" placeholder="Search..." onkeyup="filterEntities()">
     </header>
     <main>
-        <div class="container" style="height: 100%;">
+        <div class="columned">
             <div class="column" id="component-list"></div>
-            <div class="column" id="component-details">
-                <div id="component-form" style="display: none;">
-                    <span class="id"></span>
-                    <div class="name">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name">
-                    </div>
-                    <br><br>
-                    <div class="description">
-                        <label for="description">Description:</label>
-                        <textarea id="description" name="description"></textarea>
-                    </div>
-                    <br><br>
-
-                    <div class="tags">
+            <div class="column" id="component-editor" style="display: none;">
+                <div class="id">
+                    <label for="id">ID:</label>
+                    <span id="id"></span>
+                </div>
+                <div class="align-input-group half-width  name">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name">
+                </div>
+                <br><br>
+                <div class="description">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" oninput="adjustTextareaHeight(this)"></textarea>
+                </div>
+                <br><br>
+                <div class="tags">
+                    <div class="align-input-group half-width">
                         <label for="tags">Tags:</label>
-                        <input type="text" id="tags" name="tags"><br><br>
-                        <div class="container">
-                            <!-- Tags will be generated here -->
+                        <input type="text" id="tags" name="tags">
+                    </div>
+                   <br>
+                    <div class="container">
+                        <!-- Tags will be generated here -->
+                    </div>
+                </div>
+                
+                <div class="composition">
+                    <h3>Composition</h3>
+                    <div class="container">
+                        <!-- Sub Components will be generated here -->
+                    </div>
+                    <button class="add composition" onclick="addEmptySubComponent()"><i class="nf nf-cod-diff_added"></i></button>
+                </div>
+                <br>
+                <div class="properties">
+                    <h3>Properties</h3>
+                    <div class="container">
+                        <!-- Properties will be generated here -->
+                    </div>
+                    <button class="add property" onclick="addEmptyPropery()"><i class="nf nf-cod-diff_added"></i></button>
+                </div>
+                <br>
+                <button type="button" onclick="updateComponent()">Update</button>
+            </div>
+            <div class="column" id="property-editor" style="display: none;">
+                <div class="id">
+                    <label for="id">ID:</label>
+                    <span id="id"></span>
+                </div>
+                <div class="align-input-group half-width  name">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name">
+                </div>
+                <br><br>
+                <div class="align-input-group half-width  value">
+                    <label for="value">Value:</label>
+                    <input type="number" step="any" id="value" name="value">
+                </div>
+                <div class="align-input-group half-width  unit">
+                    <label for="unit">Unit:</label>
+                    <input type="text" id="unit" name="unit">
+                </div>
+                <br><br>
+                <div class="tolerance">
+                    <label for="has_tolerance">Tolerance:</label>
+                    <input type="checkbox" id="has_tolerance" name="has_tolerance" onclick="toggleDisplay('property_tolerance_extras')">
+                    <div id="property_tolerance_extras" style="display: none; width:100%">
+                        <div class="align-input-group">
+                            <div class="half-width align-input-group">
+                                <label for="min">Min:</label>
+                                <input type="number" step="any" id="min" name="min">
+                            </div>
+                            <div class="half-width align-input-group">
+                                <label for="max">Max:</label>
+                                <input type="number" step="any" id="max" name="max">
+                            </div>
                         </div>
                     </div>
-                    
-
-                    <div class="composition">
-                        <h3>Composition</h3>
-                        <div class="container">
-                            <!-- Sub Components will be generated here -->
-                        </div>
-                    </div>
+                </div>
+                <br><br>
+                <div class="source">
+                    <label for="source_type">Type of Source:</label>
+                    <select name="source_type" id="source_type">
+                        <option value="UNKNOWN">Unknown</option>
+                        <option value="APPROXIMATION">Approximated</option>
+                        <option value="COMPUTATION">Computed</option>
+                        <option value="EXPERIMENT">Experiment</option>
+                        <option value="LITERATURE">Literature</option>
+                    </select>
                     <br>
-
-                    <div class="properties">
-                        <h3>Properties</h3>
-                        <div class="container">
-                            <!-- Properties will be generated here -->
-                        </div>
-                    </div>
-                    <br>
-                    <button type="button" onclick="updateComponent()">Update</button>
+                    <label for="source">Source:</label>
+                    <textarea id="source" name="source" oninput="adjustTextareaHeight(this)"></textarea>
                 </div>
             </div>
-            <div class="column" id="component-editor"></div>
         </div>
     </main>
     

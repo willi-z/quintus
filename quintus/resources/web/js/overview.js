@@ -20,7 +20,7 @@ function createComponentHTML(componentJSON){
     componentHTMLItem.classList.add(['component']);
     componentHTMLItem.id = componentJSON.id;
     componentHTMLItem.innerHTML += `
-    <div class="main-field">
+    <div class="main-field row">
         <div class="name">${componentJSON.name}</div>
         <span class="icons">
             <div class="edit-field"><button><i class="nf nf-cod-edit"></i></button></div>
@@ -44,10 +44,13 @@ function createComponentExpandableHTML(componentJSON) {
     expandableHTML.appendChild(createTagsHTML(componentJSON.tags, false));
 
     const linksContainerHTML = document.createElement('div');
+    linksContainerHTML.style.width= "100%";
+    linksContainerHTML.style.display= "flex";
     expandableHTML.appendChild(linksContainerHTML);
 
     const usedComponentsHTMLList= document.createElement('div');
     usedComponentsHTMLList.classList.add(["links", "components"]);
+    usedComponentsHTMLList.style.width = "50%";
     usedComponentsHTMLList.textContent = "Consists of:";
     linksContainerHTML.appendChild(usedComponentsHTMLList);
     const composition = componentJSON.composition;
@@ -61,6 +64,7 @@ function createComponentExpandableHTML(componentJSON) {
 
     const usedInComponentsHTMLList= document.createElement('div');
     usedInComponentsHTMLList.classList.add(["links", "compositions"]);
+    usedInComponentsHTMLList.style.width = "50%";
     usedInComponentsHTMLList.textContent = "Used in:";
     linksContainerHTML.appendChild(usedInComponentsHTMLList);
     const used_in = componentJSON.used_in;
@@ -76,7 +80,9 @@ function createComponentExpandableHTML(componentJSON) {
 }
 
 function componentJSONtoForm(componentJSON) {
-    const form = document.getElementById('component-form');
+    const propertyForm = document.getElementById('property-editor');
+    propertyForm.style.display = 'none';
+    const form = document.getElementById('component-editor');
     if (form.style.display == 'none'){
         const tagsInput= form.querySelector('.tags input');
         tagsInput.addEventListener("keypress", function(event) {
@@ -96,7 +102,7 @@ function componentJSONtoForm(componentJSON) {
           }); 
     }
     form.style.display = 'block';
-    form.querySelector(".id").value = componentJSON.id;
+    form.querySelector("#id").textContent = componentJSON.id;
     form.querySelector(".name").children[1].value = componentJSON.name;
     form.querySelector(".description").children[1].value = componentJSON.description;
 
@@ -108,33 +114,63 @@ function componentJSONtoForm(componentJSON) {
 
     const compositionElement = form.querySelector(".composition .container");
     compositionElement.innerHTML = '';
+    const compositionTable = document.createElement('table');
+    compositionTable.innerHTML = `
+    <tr>
+    <th>Component Type</th>
+    <th>Component ID</th>
+    <th></th>
+    </tr>
+    `
+    compositionElement.appendChild(compositionTable);
     const composition = componentJSON.composition;
     if (composition != null) {
         for (var component_type in composition){
-            compositionElement.appendChild(createSubComponentHTML(component_type, composition[component_type]));
+            compositionTable.appendChild(createSubComponentHTML(component_type, composition[component_type]));
         }
     }
 
     const propertiesElement = form.querySelector(".properties .container");
     propertiesElement.innerHTML = '';
+    const propertyTable = document.createElement('table');
+    propertyTable.innerHTML = `
+    <tr>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Tolerance</th>
+    <th>Unit</th>
+    <th></th>
+    <th></th>
+    </tr>
+    `
+    propertiesElement.appendChild(propertyTable);
     const properties = componentJSON.properties;
     if (properties != null) {
         for (var property_name in properties){
             const property = properties[property_name];
-            propertiesElement.appendChild(createPropertyShortHTML(property));
+            propertyTable.appendChild(createPropertyShortHTML(property));
         }
     }
 }
 
 function createSubComponentHTML(component_type, component_id){
-    const componentHTML = document.createElement('div');
-    componentHTML.className = "component";
+    const componentHTML = document.createElement('tr');
+    componentHTML.classList.add('component', 'row');
     componentHTML.innerHTML = `
-        <input type="text" name="component_type" value="${component_type}">
-        <input type="text" name="component_id" value="${component_id}">
+        <td><input type="text" name="component_type" value="${component_type}"></td>
+        <td><input type="text" name="component_id" value="${component_id}"></td>
     `;
-    componentHTML.appendChild(createDeleteButtonHTML(componentHTML));
+    const delete_column = document.createElement('td');
+    delete_column.appendChild(createDeleteButtonHTML(componentHTML));
+    componentHTML.appendChild(delete_column);
     return componentHTML;
+}
+
+function addEmptySubComponent(){
+    const result = createSubComponentHTML('', '');
+    const form = document.getElementById('component-form');
+    const container = form.querySelector('div[class="composition"] > div[class="container"]');
+    container.children[0].appendChild(result);
 }
 
 function getComponentTypeAndComponentIdFromSubComponentHTML(divElement){
@@ -142,16 +178,74 @@ function getComponentTypeAndComponentIdFromSubComponentHTML(divElement){
 }
 
 function createPropertyShortHTML(propertyJSON){
-    const propertyHTML = document.createElement('div');
+    const propertyHTML = document.createElement('tr');
+    propertyHTML.classList.add('property', 'row');
+    propertyHTML.id = propertyJSON.id;
     propertyHTML.setAttribute('data-json', JSON.stringify(propertyJSON));
     propertyHTML.innerHTML = `
-        <span class="name">${propertyJSON.name}</span>
-        <span class="value">${propertyJSON.value}</span>
-        <span class="tolerance">(+${propertyJSON.tolerance.max}/-${propertyJSON.tolerance.min})</span>
-        <span class="unit">[${propertyJSON.unit.unit}]</span>`;
-    propertyHTML.appendChild(createEditButtonHTML(null));
-    propertyHTML.appendChild(createDeleteButtonHTML(propertyHTML));
+        <td><span class="name">${propertyJSON.name}</span></td>
+        <td><span class="value">${propertyJSON.value}</span></td>
+        <td><span class="tolerance">(+${propertyJSON.tolerance.max}/-${propertyJSON.tolerance.min})</span></td>
+        <td><span class="unit">[${propertyJSON.unit.unit}]</span></td>`;
+    const edit_column = document.createElement('td');
+    edit_column.appendChild(createEditButtonHTML(function () {
+        propertyJSONtoForm(propertyJSON);
+    }));
+    propertyHTML.appendChild(edit_column);
+    const delete_column = document.createElement('td');
+    delete_column.appendChild(createDeleteButtonHTML(propertyHTML));
+    propertyHTML.appendChild(delete_column);
     return propertyHTML;
+}
+
+function propertyJSONtoForm(propertyJSON){
+    const form = document.getElementById('property-editor');
+    console.log(propertyJSON);
+    form.style.display = 'block';
+    const id = form.children[0];
+    id.children[1].textContent = propertyJSON.id;
+    const name = form.children[1];
+    name.children[1].value = propertyJSON.name;
+    const value = form.children[4];
+    value.children[1].value = propertyJSON.value;
+    const unit = form.children[5];
+    unit.children[1].value = propertyJSON.unit.unit;
+
+    const tolerance = form.children[8];
+    const tolerance_extras = tolerance.children[2];
+    if (propertyJSON.tolerance.min == 0 && propertyJSON.tolerance.max == 0){
+        tolerance.children[1].checked = false;
+        tolerance_extras.style.display = 'none';
+    } else {
+        tolerance.children[1].checked = true;
+        tolerance_extras.style.display = 'block';
+    }
+    const tolerance_range = tolerance_extras.children[0];
+    tolerance_range.children[0].children[1].value = propertyJSON.tolerance.min;
+    tolerance_range.children[1].children[1].value = propertyJSON.tolerance.max;
+
+    const source = form.children[11];
+    if (propertyJSON.source) {
+        source.children[1].value = propertyJSON.source.source_type;
+        source.children[4].value = propertyJSON.source.remark;
+    } else {
+        source.children[1].value = 'UNKNOWN';
+        source.children[4].value = '';
+    }
+    
+}
+
+function JSONfromPropertyForm(formID) {
+    const form = document.getElementById(formID);
+}
+
+function addEmptyPropery(){
+    
+}
+
+function adjustTextareaHeight(textarea) {
+    textarea.style.height = 'auto';  /* Reset height */
+    textarea.style.height = textarea.scrollHeight + 'px'; /* Set height to the scroll height */
 }
 
 function JSONfromComponentForm(formID) {
@@ -176,17 +270,20 @@ function JSONfromComponentForm(formID) {
 function createTagsHTML(tagsList, deletable=true) {
     const tagsHTML= document.createElement('div');
     tagsHTML.className = 'tags';
+    const containerHTML= document.createElement('div');
+    containerHTML.classList.add("container");
+    tagsHTML.appendChild(containerHTML);
     tagsList.forEach(tag =>{
         const tagHTML = document.createElement('span');
         tagHTML.textContent = tag;
-        tagsHTML.appendChild(createTagHTML(tag, deletable));
+        containerHTML.appendChild(createTagHTML(tag, deletable));
     });
     return tagsHTML;
 }
 
 function createTagHTML(tagName, deletable=true) {
     const tagHTML = document.createElement('div');
-    tagHTML.className = "tag";
+    tagHTML.classList.add('tag', 'inline');
     const tagNameHTML =  document.createElement('span');
     tagNameHTML.className = "name";
     tagNameHTML.textContent = tagName;
@@ -258,4 +355,12 @@ function showInfo(element) {
     }
 }
 
+function toggleDisplay(id){
+    const element = document.getElementById(id);
+    if (element.style.display == 'none') {
+        element.style.display = 'block';
+    } else {
+        element.style.display = 'none';
+    }
+}
 
