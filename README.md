@@ -14,10 +14,13 @@ This allows experimentalists to focus on the most promising ones.
 
 ## Usage
 
-The there are two ways:
+The there are two ways to insert and edit data:
 1. import the data an EXCEL-file with a additional data in a JSON-config file (see examples)
 2. open a graphical user interface in your browser (work in progress)
+![](/docs/QUINTUS.png)
 
+The avaible data can be combined with serveral models and used for further evaluation and optimizations.
+![](/docs/plot.png)
 
 ## Development
 

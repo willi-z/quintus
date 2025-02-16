@@ -12,6 +12,7 @@ pub enum Electrode {
 pub fn new_battery_composer(no_electrode_layers: usize, outer_electrode: Electrode) -> Composer {
     Composer {
         ctype: CompositionType::LAYERED,
+        tag_with: vec!["battery".to_string()],
         require_component_types: HashSet::from([
             "anode".to_string(),
             "cathode".to_string(),

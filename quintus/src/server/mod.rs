@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::Path, sync::Arc};
+use std::{path::Path, sync::Arc};
 
 use rocket::{
     self,
@@ -7,7 +7,7 @@ use rocket::{
 };
 use serde::Serialize;
 
-use crate::{io::{sqlite::SQLiteData, traits::DataReader}, structures::{Component, ComponentType, ID}};
+use crate::{io::{sqlite::SQLiteData, traits::DataReader}, structures::Component};
 
 type DBHandel = Arc<SQLiteData>;
 

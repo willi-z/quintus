@@ -158,6 +158,11 @@ where
                 component = existing[0].clone();
             } else {
                 component = Component::new();
+                component.name = format!("QUINTUS_{i}");
+                for (key, value) in self.composer.properties.iter(){
+                    component.description.push_str(&format!("{}: {:#?}\n", key, value));
+                }
+                
                 let mut composition = HashMap::new();
                 for (ctype, &component) in config.iter() {
                     composition.insert(ctype.clone(), component.id.clone());
@@ -168,8 +173,10 @@ where
             for evaluation in self.evaluations.iter() {
                 component.add_measurement(evaluation.evaluate(&self.composer, &config));
             }
-            if !component.tags.contains("battery") {
-                component.tags.insert("battery".to_string());
+            for tag in self.composer.tag_with.iter(){
+                if !component.tags.contains(tag) {
+                    component.tags.insert(tag.clone());
+                }
             }
             if compostions_exits {
                 self.write_to
